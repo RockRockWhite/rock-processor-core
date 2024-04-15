@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.bin": "code-text-binary",
+        "cassert": "cpp",
+        "new": "cpp",
+        "random": "cpp",
+        "vector": "cpp"
+    },
+    "digital-ide.welcome.show": false,
+    "digital-ide.dont-show-again.propose.issue": true
+}
