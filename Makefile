@@ -27,10 +27,10 @@ sim: $(SRC)/$(NAME).v \
 nvboard: $(SRC)/$(NAME).v \
 	$(NVBOARD_DIR)/$(NAME)_nvboard.cpp
 	@echo "Building and running simulation..."
-	verilator -cc --exe --build  --trace $^ $(NVBOARD_HOME)/build/nvboard.a \
+	verilator -cc --exe --build --trace $^ $(NVBOARD_HOME)/build/nvboard.a \
 		-I$(SRC) \
 		-CFLAGS -I$(NVBOARD_HOME)/usr/include \
-		-CFLAGS -I$(CURDIR)/include \
+		-CFLAGS -I$(CURDIR)/nvboard/include \
 		-LDFLAGS -lSDL2 -LDFLAGS -lSDL2_image -LDFLAGS -lSDL2_ttf
 	@echo "Done! Running nvboard..."
 	mkdir -p $(WAVEFORM_DIR)

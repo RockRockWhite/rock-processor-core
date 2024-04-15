@@ -1,0 +1,4 @@
+top=regtest
+d (SW3, SW2, SW1, SW0)
+clk (BTNC)
+q (LD3, LD2, LD1, LD0)
