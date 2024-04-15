@@ -1,5 +1,5 @@
 // Register of D-Type Flip-flops
-module REGISTER(q, d, clk);
+module Register(q, d, clk);
     parameter N = 1;
     output reg [N-1:0] q;
     input [N-1:0]      d;

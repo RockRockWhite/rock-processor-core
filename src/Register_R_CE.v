@@ -1,6 +1,6 @@
 // Register with reset and clock enable
 //  Reset works independently of clock enable
-module REGISTER_R_CE(q, d, rst, ce, clk);
+module Register_R_CE(q, d, rst, ce, clk);
     parameter N = 1;
     parameter INIT = {N{1'b0}};
     output reg [N-1:0] q;
