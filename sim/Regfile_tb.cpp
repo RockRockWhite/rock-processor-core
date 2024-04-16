@@ -53,6 +53,30 @@ int main(int argc, char **argv)
             true);
     }
 
+    // test write to zero register
+    tb.add_event(
+        705, [](VRegfile *dut)
+        {
+            dut->rd = 0;
+            dut->write_data = 114514;
+            dut->write_enable = 1; },
+        false);
+
+    tb.add_event(
+        715, [](VRegfile *dut)
+        { dut->rs1 = 0; },
+        false);
+
+    tb.add_event(
+        715, [](VRegfile *dut)
+        { assert(dut->read_data1 == 0); },
+        true);
+    // tb.add_event(
+    //     330 + clock_period * 33, [](VRegfile *dut)
+    //     {
+    //         assert(dut->read_data1 == 0); },
+    //     false);
+
     tb.sim_and_dump_wave(1000);
 
     return 0;

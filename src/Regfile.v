@@ -21,10 +21,11 @@ module Regfile #(parameter N = 32)(
         end
     endgenerate
 
+
     // set register enable
     always @(*) begin
         for(integer i = 0; i != 32; i = i + 1) begin
-            register_enable[i] = (i[4:0] == rd) ? write_enable : 1'b0;
+            register_enable[i] = (i[4:0] == rd) ? (write_enable && (rd != 0)) : 1'b0;
         end
     end
 
