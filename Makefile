@@ -16,7 +16,7 @@ sim: $(SRC)/$(NAME).v \
 	$(SIM)/$(NAME)_tb.cpp
 
 	@echo "Building and running simulation..."
-	verilator -cc --exe --build  --trace $^ -I$(SRC)
+	verilator -cc --exe --build  --trace $^ -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include
 	@echo "Done! Running simulation..."
 	mkdir -p $(WAVEFORM_DIR)
 	cd $(WAVEFORM_DIR) && ../$(OBJ_DIR)/V$(NAME)

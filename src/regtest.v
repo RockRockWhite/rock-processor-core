@@ -10,6 +10,4 @@ module regtest(
 
     Register #(.N(4)) u_Register(.q(q), .d(d), .clk(clk));
 
-
-
 endmodule
