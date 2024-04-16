@@ -1,4 +1,4 @@
-`include "./Register_CE.v"
+`include "Register_CE.v"
 
 module Regfile #(parameter N = 32)(
         input clk,
