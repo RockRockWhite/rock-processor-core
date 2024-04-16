@@ -5,24 +5,26 @@
 #include "testbench.h"
 #include "VRegfile.h"
 
+using top_module_t = VRegfile;
+
 int main(int argc, char **argv)
 {
     const int clock_period = 10;
-    testbench_t<VRegfile> tb{argc, argv, "Regfile.vcd", [](VRegfile *dut)
-                             { return &dut->clk; },
-                             1000, clock_period};
+    testbench_t<top_module_t> tb{argc, argv, "Regfile.vcd", [](top_module_t *dut)
+                                 { return &dut->clk; },
+                                 1000, clock_period};
 
     // wire all the registers
     for (int i = 0; i != 32; i++)
     {
         // disable write
         tb.add_event(
-            clock_period * i + 3, [i](VRegfile *dut)
+            clock_period * i + 3, [i](top_module_t *dut)
             { dut->write_enable = 0; },
             false);
 
         tb.add_event(
-            clock_period * i + 5, [i](VRegfile *dut)
+            clock_period * i + 5, [i](top_module_t *dut)
             { 
                 dut->rd = i;
                 dut->write_data = i; 
@@ -32,7 +34,7 @@ int main(int argc, char **argv)
 
     // disable write
     tb.add_event(
-        clock_period * 32 + 3, [](VRegfile *dut)
+        clock_period * 32 + 3, [](top_module_t *dut)
         { dut->write_enable = 0; },
         false);
 
@@ -40,7 +42,7 @@ int main(int argc, char **argv)
     for (int i = 0; i != 32; i++)
     {
         tb.add_event(
-            330 + clock_period * i, [i](VRegfile *dut)
+            330 + clock_period * i, [i](top_module_t *dut)
             { 
                 dut->rs1 = i;
                 dut->rs2 = 31 - i; },
@@ -48,7 +50,7 @@ int main(int argc, char **argv)
 
         // verify the read data
         tb.add_event(
-            330 + clock_period * i, [i](VRegfile *dut)
+            330 + clock_period * i, [i](top_module_t *dut)
             {
                 assert(dut->read_data1 == i);
                 assert(dut->read_data2 == 31 - i ); },
@@ -57,7 +59,7 @@ int main(int argc, char **argv)
 
     // test write to zero register
     tb.add_event(
-        705, [](VRegfile *dut)
+        705, [](top_module_t *dut)
         {
             dut->rd = 0;
             dut->write_data = 114514;
@@ -65,12 +67,12 @@ int main(int argc, char **argv)
         false);
 
     tb.add_event(
-        715, [](VRegfile *dut)
+        715, [](top_module_t *dut)
         { dut->rs1 = 0; },
         false);
 
     tb.add_event(
-        715, [](VRegfile *dut)
+        715, [](top_module_t *dut)
         { assert(dut->read_data1 == 0); },
         true);
     // tb.add_event(
