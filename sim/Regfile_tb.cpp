@@ -8,7 +8,9 @@
 int main(int argc, char **argv)
 {
     const int clock_period = 10;
-    testbench_t<VRegfile> tb{argc, argv, "Regfile.vcd", clock_period};
+    testbench_t<VRegfile> tb{argc, argv, "Regfile.vcd", [](VRegfile *dut)
+                             { return &dut->clk; },
+                             1000, clock_period};
 
     // wire all the registers
     for (int i = 0; i != 32; i++)
@@ -77,7 +79,7 @@ int main(int argc, char **argv)
     //         assert(dut->read_data1 == 0); },
     //     false);
 
-    tb.sim_and_dump_wave(1000);
+    tb.sim_and_dump_wave();
 
     return 0;
 }

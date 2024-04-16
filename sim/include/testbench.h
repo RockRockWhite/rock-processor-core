@@ -23,12 +23,16 @@ protected:
     T *dut;
     VerilatedVcdC *trace;
     unordered_map<int, vector<event_t<T>>> events;
-    int clock_period = 10;
+    function<IData *(T *)> get_clock_ptr_func;
+    CData *clock;
+    uint64_t clock_period;
+    uint64_t total_time;
 
 public:
-    testbench_t(int argc, char **argv, const char *trace_file, int clock_period = 10)
+    testbench_t(int argc, char **argv, const char *trace_file, function<CData *(T *)> get_clock_ptr_func, uint64_t total_time = 1000, uint64_t clock_period = 10)
     {
         this->clock_period = clock_period;
+        this->total_time = total_time;
 
         this->ctx = new VerilatedContext;
         this->ctx->commandArgs(argc, argv);
@@ -38,6 +42,9 @@ public:
 
         this->dut = new T{this->ctx};
         this->dut->trace(this->trace, 5);
+
+        // get clock pointer
+        this->clock = get_clock_ptr_func(dut);
 
         this->trace->open(trace_file);
     }
@@ -59,18 +66,21 @@ public:
         events[time].push_back({action, post_eval});
     }
 
-    void sim_and_dump_wave(int total_time)
+    void sim_and_dump_wave()
     {
         // initialize clock
-        dut->clk = 0;
+        if (this->clock != nullptr)
+        {
+            *(this->clock) = 0;
+        }
 
         // run simulation
-        for (int time = 0; time != total_time; time++)
+        for (int time = 0; time != this->total_time; time++)
         {
-            if (time % (this->clock_period / 2) == 0)
+            if (this->clock != nullptr && time % (this->clock_period / 2) == 0)
             {
                 // update clock
-                dut->clk = dut->clk == 0 ? 1 : 0;
+                *(this->clock) = (*(this->clock) == 0) ? 1 : 0;
             }
 
             vector<event_t<T>> EMPTY;
