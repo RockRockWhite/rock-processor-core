@@ -26,18 +26,20 @@ protected:
     int clock_period = 10;
 
 public:
-    testbench_t(int argc, char **argv, const char *trace_file)
+    testbench_t(int argc, char **argv, const char *trace_file, int clock_period = 10)
     {
-        ctx = new VerilatedContext;
-        ctx->commandArgs(argc, argv);
+        this->clock_period = clock_period;
+
+        this->ctx = new VerilatedContext;
+        this->ctx->commandArgs(argc, argv);
 
         Verilated::traceEverOn(true);
-        trace = new VerilatedVcdC;
+        this->trace = new VerilatedVcdC;
 
-        dut = new T{ctx};
-        dut->trace(trace, 5);
+        this->dut = new T{this->ctx};
+        this->dut->trace(this->trace, 5);
 
-        trace->open(trace_file);
+        this->trace->open(trace_file);
     }
 
     ~testbench_t()
@@ -45,16 +47,6 @@ public:
         trace->close();
         delete dut;
         delete ctx;
-    }
-
-    void set_clock_period(int period)
-    {
-        clock_period = period;
-    }
-
-    int get_clock_period()
-    {
-        return clock_period;
     }
 
     void add_event(int time, function<void(T *)> action, bool post_eval)
