@@ -5,6 +5,7 @@
 
 #include "testbench.h"
 #include "VProcessorCore.h"
+#include "fake_memory.h"
 
 using top_module_t = VProcessorCore;
 
@@ -15,12 +16,19 @@ int main(int argc, char **argv)
                                  { return &dut->clk; },
                                  500, clock_period};
 
+    // init fake memory
+    memory_t mem;
+    mem.load_file("../rom/test.rom", 0);
+
     // test counter
     for (int i = 0; i != 32; i++)
     {
         tb.add_event(
-            clock_period * i, [i](top_module_t *dut)
-            { dut->instruction_test = 0x07B00093; },
+            clock_period * i, [i, &mem](top_module_t *dut)
+            { 
+                uint32_t inst;
+                mem.read(dut->pc_test, (uint8_t *)&inst, 4);
+                dut->instruction_test = inst; },
             true);
     }
 

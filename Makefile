@@ -18,7 +18,7 @@ sim: $(SRC)/$(NAME).v \
 	$(SIM)/$(NAME)_tb.cpp
 
 	@echo "Building and running simulation..."
-	verilator -cc --exe --build  --trace $^ -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include
+	verilator -cc --exe --build  --trace $^ -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20
 	@echo "Done! Running simulation..."
 	mkdir -p $(WAVEFORM_DIR)
 	cd $(WAVEFORM_DIR) && ../$(OBJ_DIR)/V$(NAME)
@@ -31,12 +31,14 @@ nvboard: $(SRC)/$(NAME).v \
 	@echo "Building and running simulation..."
 	verilator -cc --exe --build --trace $^ $(NVBOARD_HOME)/build/nvboard.a \
 		-I$(SRC) \
+		-CFLAGS -std=c++20 \
 		-CFLAGS -I$(NVBOARD_HOME)/usr/include \
 		-CFLAGS -I$(CURDIR)/nvboard/include \
 		-LDFLAGS -lSDL2 -LDFLAGS -lSDL2_image -LDFLAGS -lSDL2_ttf
 	@echo "Done! Running nvboard..."
 	mkdir -p $(WAVEFORM_DIR)
 	cd $(WAVEFORM_DIR) && export DISPLAY=$(DISPLAY) && ../$(OBJ_DIR)/V$(NAME)
+
 
 $(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
 	@echo "Generating ROM file..."
