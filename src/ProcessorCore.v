@@ -2,6 +2,8 @@
 `include "Regfile.v"
 `include "ALU.v"
 
+import "DPI-C" function void ebreak();
+
 module ProcesserCore(
         input clk,
         input [31:0] instruction_test,
@@ -25,4 +27,12 @@ module ProcesserCore(
             );
 
     ALU alu(.a(reg_read_data1), .b({{20{instruction_test[31]}}, instruction_test[31:20]}), .alu_select(4'b0), .alu_result(alu_result));
+
+    // TODO: ebreak
+    always @(*) begin
+
+        if(instruction_test == 32'h00100073) begin
+            ebreak();
+        end
+    end
 endmodule

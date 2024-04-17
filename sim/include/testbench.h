@@ -29,7 +29,9 @@ protected:
     uint64_t total_time;
 
 public:
-    testbench_t(int argc, char **argv, const char *trace_file, function<CData *(T *)> get_clock_ptr_func, uint64_t total_time = 1000, uint64_t clock_period = 10)
+    bool ebreak = false;
+
+    testbench_t(int argc, char **argv, const char *trace_file, function<CData *(T *)> get_clock_ptr_func, uint64_t total_time = 0, uint64_t clock_period = 10)
     {
         this->clock_period = clock_period;
         this->total_time = total_time;
@@ -75,8 +77,15 @@ public:
         }
 
         // run simulation
-        for (int time = 0; time != this->total_time; time++)
+        for (int time = 0; true; time++)
         {
+            // if ebreak, or time out, break
+            if ((this->total_time != 0 && time == this->total_time) ||
+                this->ebreak)
+            {
+                break;
+            }
+
             if (this->clock != nullptr && time % (this->clock_period / 2) == 0)
             {
                 // update clock

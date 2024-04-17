@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/share/verilator/include/",
-                "${NVBOARD_HOME}/usr/include/"
+                "${NVBOARD_HOME}/usr/include/",
+                "/usr/share/verilator/include/vltstd"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
