@@ -5,6 +5,8 @@ DISPLAY = :0.0
 OBJ_DIR = ./obj_dir
 WAVEFORM_DIR = ./waveform
 NVBOARD_DIR = ./nvboard
+ROM_DIR = ./rom
+TOOLS_DIR = ./tools
 
 .PHONY: header
 header: $(SRC)/$(NAME).v
@@ -35,6 +37,13 @@ nvboard: $(SRC)/$(NAME).v \
 	@echo "Done! Running nvboard..."
 	mkdir -p $(WAVEFORM_DIR)
 	cd $(WAVEFORM_DIR) && export DISPLAY=$(DISPLAY) && ../$(OBJ_DIR)/V$(NAME)
+
+$(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
+	@echo "Generating ROM file..."
+	java -jar $(TOOLS_DIR)/venus.jar $< --dump > $@
+
+.PHONY: rom
+rom: $(ROM_DIR)/$(NAME).rom
 
 .PHONY: clean
 clean:
