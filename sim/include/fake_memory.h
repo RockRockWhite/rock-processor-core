@@ -57,4 +57,26 @@ public:
             buf[i] = memory[address + i];
         }
     }
+
+    uint64_t load_file(const char *filename, uint64_t address)
+    {
+        FILE *fd = fopen(filename, "r");
+
+        if (fd == nullptr)
+        {
+            throw runtime_error(std::format("Failed to open file: {}", filename));
+        }
+
+        uint32_t instruction;
+
+        uint64_t offset = 0;
+        while (fscanf(fd, "%x", &instruction) != EOF)
+        {
+            this->write(address + sizeof(instruction) * offset, (uint8_t *)&instruction, sizeof(instruction));
+            offset++;
+        }
+
+        fclose(fd);
+        return offset;
+    }
 };

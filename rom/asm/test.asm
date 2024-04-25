@@ -1,0 +1,2 @@
+li t0, 0x123
+ebreak

@@ -47,6 +47,13 @@ run: $(SRC)/ProcessorCore.v
 	@echo "Done! Running RPC..."
 	$(OBJ_DIR)/rpc --img $(IMG) $(RPC_ARGS)
 
+$(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
+	@echo "Generating ROM file..."
+	java -jar $(TOOLS_DIR)/venus.jar $< --dump > $@
+
+.PHONY: rom
+rom: $(ROM_DIR)/$(NAME).rom
+
 .PHONY: clean
 clean:
 	rm -rf $(OBJ_DIR)

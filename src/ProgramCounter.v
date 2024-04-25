@@ -15,7 +15,5 @@ module ProgramCounter#(parameter N = 32)(
         pc_next = pc_val + 4;
     end
 
-
-
     assign instruction_address = pc_val;
 endmodule
