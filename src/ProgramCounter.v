@@ -2,6 +2,8 @@
 
 module ProgramCounter#(parameter N = 32)(
         input clk,
+        input pc_select,
+        input [N-1:0] alu_result,
         output [N-1:0] instruction_address
     );
 
@@ -12,7 +14,7 @@ module ProgramCounter#(parameter N = 32)(
 
     // update pc register
     always @(*) begin
-        pc_next = pc_val + 4;
+        pc_next = pc_select? alu_result: (pc_val + 4);
     end
 
     assign instruction_address = pc_val;
