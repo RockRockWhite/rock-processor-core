@@ -2,6 +2,7 @@
 `include "Regfile.v"
 `include "ALU.v"
 `include "ControlLogic.v"
+`include "ImmediateGenerator.v"
 
 import "DPI-C" function void ebreak();
 
@@ -15,9 +16,15 @@ module ProcesserCore(
 
     wire [31:0] reg_read_data1;
     wire [31:0] reg_read_data2;
+
+    wire [31:0] immediate;
+
     wire [31:0] alu_result;
     
+    wire [2:0] cl_immediate_select;
+    wire [3:0] cl_alu_select;
     wire cl_register_write_enable;
+
         
     Regfile regfile(
                 .clk(clk),
@@ -30,10 +37,12 @@ module ProcesserCore(
                 .read_data2(reg_read_data2)
             );
 
-    ALU alu(.a(reg_read_data1), .b({{20{instruction_test[31]}}, instruction_test[31:20]}), .alu_select(4'b0), .alu_result(alu_result));
+    ALU alu(.a(reg_read_data1), .b({{20{instruction_test[31]}}, instruction_test[31:20]}), .alu_select(cl_alu_select), .alu_result(alu_result));
 
-
-    ControlLogic cl(.instruction(instruction_test), .register_write_enable(cl_register_write_enable));
+    ControlLogic cl(.instruction(instruction_test), .immediate_select(cl_immediate_select), .alu_select(cl_alu_select), .register_write_enable(cl_register_write_enable));
+    // outports wire
+    ImmediateGenerator imm_gen(.instruction(instruction_test), .immediate_select(cl_immediate_select), .immediate(immediate));
+    
     // TODO: ebreak
     always @(*) begin
 
