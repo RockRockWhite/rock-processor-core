@@ -72,7 +72,10 @@
         "thread": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "args.h": "c",
+        "getopt.h": "c",
+        "args_builder.h": "c"
     },
     "digital-ide.welcome.show": false,
     "digital-ide.dont-show-again.propose.issue": true

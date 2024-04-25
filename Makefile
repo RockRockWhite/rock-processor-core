@@ -39,6 +39,14 @@ nvboard: $(SRC)/$(NAME).v \
 	mkdir -p $(WAVEFORM_DIR)
 	cd $(WAVEFORM_DIR) && export DISPLAY=$(DISPLAY) && ../$(OBJ_DIR)/V$(NAME)
 
+.PHONY: run
+run: $(SRC)/ProcessorCore.v
+
+	@echo "Building and running simulation..."
+	verilator -cc --exe --build  --trace $^ $(SIM)/src/*.cpp -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20 -o rpc
+	@echo "Done! Running RPC..."
+	$(OBJ_DIR)/rpc --img $(IMG) $(RPC_ARGS)
+
 .PHONY: clean
 clean:
 	rm -rf $(OBJ_DIR)

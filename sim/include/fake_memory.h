@@ -1,8 +1,8 @@
+#include <iostream>
 #include <unordered_map>
 #include <string>
 #include <format>
 #include <stdexcept>
-#include <cstdio>
 #include <cstdint>
 #include <unistd.h>
 #include <fcntl.h>
@@ -15,9 +15,9 @@ protected:
     unordered_map<uint64_t, uint64_t> memory;
 
 public:
-    uint64_t load_img(const char *img_file, uint64_t address)
+    uint64_t load_img(std::string img_file, uint64_t address)
     {
-        FILE *fd = fopen(img_file, "rb");
+        FILE *fd = fopen(img_file.c_str(), "rb");
 
         if (fd == nullptr)
         {
@@ -31,8 +31,7 @@ public:
             this->write(address + offset, (uint8_t *)&byte, 1);
             offset++;
         }
-
-        printf("Loaded %s to memory at 0x%lx, size\n", img_file, address, offset);
+        std::cout << std::format("Loaded {} to memory at 0x{:x}, size {}\n", img_file, address, offset);
 
         fclose(fd);
         return offset;
@@ -58,6 +57,4 @@ public:
             buf[i] = memory[address + i];
         }
     }
-
-    void dump();
 };

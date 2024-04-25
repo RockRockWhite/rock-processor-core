@@ -1,4 +1,4 @@
-`include "Register.v"
+`include "Register_R.v"
 
 module ProgramCounter#(parameter N = 32)(
         input clk,
@@ -8,7 +8,7 @@ module ProgramCounter#(parameter N = 32)(
 
     wire [N-1:0] pc_val;
     reg [N-1:0] pc_next;
-    Register #(.N(N)) pc(.q(pc_val), .d(pc_next), .clk(clk));
+    Register_R #(.N(N), .INIT(32'h80000000)) pc(.q(pc_val), .d(pc_next), .rst(1'b0), .clk(clk));
 
     // update pc register
     always @(*) begin
