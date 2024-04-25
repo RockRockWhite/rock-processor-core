@@ -34,7 +34,9 @@ int main(int argc, char **argv)
 
     // init fake memory
     memory_t mem;
-    mem.load_file("../rom/test.rom", 0);
+    mem.load_img("../rom/dummy-riscv32e-npc.bin", 0x80000000);
+
+    // init pc
 
     // test counter
     for (int i = 0; i != 32; i++)

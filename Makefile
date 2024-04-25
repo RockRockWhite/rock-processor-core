@@ -15,7 +15,7 @@ header: $(SRC)/$(NAME).v
 
 .PHONY: sim
 sim: $(SRC)/$(NAME).v \
-	$(SIM)/$(NAME)_tb.cpp
+	$(SIM)/module_test/$(NAME)_tb.cpp
 
 	@echo "Building and running simulation..."
 	verilator -cc --exe --build  --trace $^ -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20
@@ -38,14 +38,6 @@ nvboard: $(SRC)/$(NAME).v \
 	@echo "Done! Running nvboard..."
 	mkdir -p $(WAVEFORM_DIR)
 	cd $(WAVEFORM_DIR) && export DISPLAY=$(DISPLAY) && ../$(OBJ_DIR)/V$(NAME)
-
-
-$(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
-	@echo "Generating ROM file..."
-	java -jar $(TOOLS_DIR)/venus.jar $< --dump > $@
-
-.PHONY: rom
-rom: $(ROM_DIR)/$(NAME).rom
 
 .PHONY: clean
 clean:

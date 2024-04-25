@@ -15,23 +15,24 @@ protected:
     unordered_map<uint64_t, uint64_t> memory;
 
 public:
-    uint64_t load_file(const char *filename, uint64_t address)
+    uint64_t load_img(const char *img_file, uint64_t address)
     {
-        FILE *fd = fopen(filename, "r");
+        FILE *fd = fopen(img_file, "rb");
 
         if (fd == nullptr)
         {
-            throw runtime_error(std::format("Failed to open file: {}", filename));
+            throw runtime_error(std::format("Failed to open file: {}", img_file));
         }
 
-        uint32_t instruction;
-
+        uint8_t byte;
         uint64_t offset = 0;
-        while (fscanf(fd, "%x", &instruction) != EOF)
+        while (fread(&byte, 1, 1, fd) == 1)
         {
-            this->write(address + sizeof(instruction) * offset, (uint8_t *)&instruction, sizeof(instruction));
+            this->write(address + offset, (uint8_t *)&byte, 1);
             offset++;
         }
+
+        printf("Loaded %s to memory at 0x%lx, size\n", img_file, address, offset);
 
         fclose(fd);
         return offset;
