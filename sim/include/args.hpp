@@ -1,5 +1,4 @@
-#ifndef _ARGS_H
-#define _ARGS_H
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -16,5 +15,3 @@ public:
     std::string img_file = "";
     static args_t build(int argc, char **argv);
 };
-
-#endif

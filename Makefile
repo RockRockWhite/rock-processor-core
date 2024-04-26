@@ -41,11 +41,18 @@ nvboard: $(SRC)/$(NAME).v \
 
 .PHONY: run
 run: $(SRC)/ProcessorCore.v
-
 	@echo "Building and running simulation..."
 	verilator -cc --exe --build  --trace $^ $(SIM)/src/*.cpp -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20 -CFLAGS -Werror -o rpc
 	@echo "Done! Running RPC..."
 	$(OBJ_DIR)/rpc --img $(IMG) $(RPC_ARGS)
+
+.PHONY: gdb
+gdb: $(SRC)/ProcessorCore.v
+	@echo "Building and running simulation..."
+	verilator -cc --exe --build  --trace $^ $(SIM)/src/*.cpp -I$(SRC) -CFLAGS -O0 -CFLAGS -g -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20 -CFLAGS -Werror -o rpc
+	@echo "Done! Running RPC..."
+	gdbserver :1234 $(OBJ_DIR)/rpc --img $(IMG) $(RPC_ARGS)
+
 
 $(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
 	@echo "Generating ROM file..."
