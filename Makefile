@@ -43,7 +43,7 @@ nvboard: $(SRC)/$(NAME).v \
 run: $(SRC)/ProcessorCore.v
 
 	@echo "Building and running simulation..."
-	verilator -cc --exe --build  --trace $^ $(SIM)/src/*.cpp -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20 -o rpc
+	verilator -cc --exe --build  --trace $^ $(SIM)/src/*.cpp -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20 -CFLAGS -Werror -o rpc
 	@echo "Done! Running RPC..."
 	$(OBJ_DIR)/rpc --img $(IMG) $(RPC_ARGS)
 

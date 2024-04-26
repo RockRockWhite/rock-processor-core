@@ -8,21 +8,7 @@
 #include <functional>
 
 #include "args.hpp"
-
-#include "testbench.h"
-#include "VProcessorCore.h"
-#include "VProcessorCore__Dpi.h"
-#include "fake_memory.h"
-
-using top_module_t = VProcessorCore;
-
-std::function<void()> ebreak_handler_func = []()
-{ throw std::runtime_error("ebreak_handler_func must be assigned a function"); };
-
-void ebreak()
-{
-    ebreak_handler_func();
-}
+#include "sdb.hpp"
 
 int main(int argc, char **argv)
 {
@@ -31,36 +17,41 @@ int main(int argc, char **argv)
         // build args
         auto args = args_t::build(argc, argv);
 
-        const int clock_period = 10;
-        testbench_t<top_module_t> tb{0, nullptr, "./waveform/rpc.vcd", [](top_module_t *dut)
-                                     { return &dut->clk; },
-                                     200};
+        sdb_t sdb("./waveform/rpc.vcd", args.img_file);
+        sdb.main_loop();
 
-        // ebreak handler
-        ebreak_handler_func = [&tb]()
-        {
-            tb.ebreak = true;
-        };
+        // const int clock_period = 10;
+        // testbench_t<top_module_t> tb{0, nullptr, "./waveform/rpc.vcd", [](top_module_t *dut)
+        //                              { return &dut->clk; },
+        //                              200};
 
-        // init fake memory
-        memory_t mem;
-        mem.load_img(args.img_file, 0x80000000);
+        // // ebreak handler
+        // ebreak_handler_func = [&tb]()
+        // {
+        //     tb.ebreak = true;
 
-        // init pc
+        //     std::cout << "HIT GOOD TRAP" << std::endl;
+        // };
 
-        // test counter
-        for (int i = 0; i != 32; i++)
-        {
-            tb.add_event(
-                clock_period * i, [i, &mem](top_module_t *dut)
-                { 
-                uint32_t inst;
-                mem.read(dut->pc_test, (uint8_t *)&inst, 4);
-                dut->instruction_test = inst; },
-                true);
-        }
+        // // init fake memory
+        // memory_t mem;
+        // mem.load_img(args.img_file, 0x80000000);
 
-        tb.sim_and_dump_wave();
+        // // init pc
+
+        // // test counter
+        // for (int i = 0; i != 32; i++)
+        // {
+        //     tb.add_event(
+        //         clock_period * i, [i, &mem](top_module_t *dut)
+        //         {
+        //         uint32_t inst;
+        //         mem.read(dut->pc_test, (uint8_t *)&inst, 4);
+        //         dut->instruction_test = inst; },
+        //         true);
+        // }
+
+        // tb.sim_and_dump_wave();
     }
     catch (const std::exception &e)
     {
