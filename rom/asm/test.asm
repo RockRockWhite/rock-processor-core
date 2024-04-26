@@ -1,5 +1,7 @@
 li t0, 0x123
 auipc t1, 0x123
 lui t2, 0x123
-jal t3, -8
+jal t3, 8
+li t0, 0x123
+jalr t4, t3, 0x4
 ebreak

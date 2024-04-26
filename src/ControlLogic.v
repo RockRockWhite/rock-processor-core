@@ -60,6 +60,8 @@ module ControlLogic(
 
                 end
             end
+
+
             7'b0010011: begin
                 // I type algorithm and logic instructions
                 pc_select = 1'b0;
@@ -76,6 +78,21 @@ module ControlLogic(
                     // addi
                     alu_select = 4'b0000;
                 end
+            end
+
+            7'b1100111: begin
+                // I type jalr
+                pc_select = 1'b1;
+
+                a_select = 1'b0;
+                b_select = 1'b1;
+
+                immediate_select = 3'b001;
+                register_write_enable = 1'b1;
+
+                alu_select = 4'b0;
+
+                write_back_select = 2'b10;
             end
 
             7'b0110111: begin
