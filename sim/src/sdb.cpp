@@ -7,6 +7,12 @@
 
 std::shared_ptr<cpu_t> sdb::cpu = nullptr;
 
+static int cmd_q(std::vector<std::string> &tokens)
+{
+    sdb::cpu->state = CPU_END;
+    return 0;
+}
+
 static int cmd_si(std::vector<std::string> &tokens)
 {
     // if no argument, default exec one instruction
@@ -30,6 +36,8 @@ static int cmd_si(std::vector<std::string> &tokens)
 std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> cmd_table = {
     // Exec single instruction
     {"si", cmd_si},
+    // Exit sdb,
+    {"q", cmd_q},
 };
 
 static std::vector<std::string> read_command()
@@ -79,6 +87,10 @@ void sdb::main_loop()
             std::cout << "HIT GOOD TRAP" << std::endl;
             break;
         }
+        if (sdb::cpu->state == CPU_END)
+        {
+            std::cout << "quit" << std::endl;
+            break;
+        }
     }
-
 }
