@@ -41,8 +41,14 @@ $(BUILD_DIR)/%.o: $(SIM_SRC)/%.cpp
 $(BINARY): $(BUILD_DIR)/VProcessorCore.h $(OBJS)
 	@echo LD $(OBJS)
 	@$(LD) $(OBJS) -o $@ $(LDFLAGS) -lVProcessorCore
-	
-test:$(BINARY)
+
+$(BUILD_DIR)/%_tb.o: $(SIM_DIR)/module_test/%_tb.cpp $(BUILD_DIR)/V%.h
+	@echo "CXX $<"
+	@$(CXX) $(CFLAGS) -std=c++20 -Werror -c $< -o $@
+
+$(BUILD_DIR)/%_tb: $(BUILD_DIR)/%_tb.o
+	@echo LD $<
+	@$(LD) $< -o $@ $(LDFLAGS) -lV$*
 
 .PHONY: run
 run: $(BINARY)
@@ -54,46 +60,35 @@ gdb: $(BINARY)
 	@echo "Building and running simulation via gdb..."
 	gdbserver :1234 $< --img $(IMG) $(RPC_ARGS)
 
+.PHONY: header
+header: $(BUILD_DIR)/V$(NAME).h
+	@echo "Generating header file for $(NAME)..."
 
+# makefile for module test
+.PHONY: module_test
+module_test: $(BUILD_DIR)/$(NAME)_tb
+	@echo "Building and running simulation..."
+	mkdir -p $(WAVEFORM_DIR)
+	cd $(WAVEFORM_DIR) && $<
+	@echo "Done! Displaying waveform..."
+	export DISPLAY=$(DISPLAY) && gtkwave $(WAVEFORM_DIR)/$(NAME).vcd
 
 $(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
 	@echo "Generating ROM file..."
 	java -jar $(TOOLS_DIR)/venus.jar $< --dump > $@
 
-
-
-
 $(BUILD_DIR)/disasm.o: $(SIM_DIR)/src/disasm.cc
 	@echo "Building disassembler..."
 	g++ -c $<  $(shell llvm-config --cxxflags) -fPIE $(shell llvm-config --libs)
-
-.PHONY: rom
-rom: $(ROM_DIR)/$(NAME).rom
 
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(WAVEFORM_DIR)
 
-
-
-# old mkdir
-.PHONY: header
-header: $(SRC)/$(NAME).v
-	@echo "Generating header file for $(NAME)..."
-	verilator -cc --trace $< -I$(SRC)
-
-.PHONY: sim
-sim: $(SRC)/$(NAME).v \
-	$(SIM_DIR)/module_test/$(NAME)_tb.cpp
-
-	@echo "Building and running simulation..."
-	verilator -cc --exe --build  --trace $^ -I$(SRC) -CFLAGS -I$(CURDIR)/sim/include -CFLAGS -std=c++20
-	@echo "Done! Running simulation..."
-	mkdir -p $(WAVEFORM_DIR)
-	cd $(WAVEFORM_DIR) && ../$(BUILD_DIR)/V$(NAME)
-	@echo "Done! Displaying waveform..."
-	export DISPLAY=$(DISPLAY) && gtkwave $(WAVEFORM_DIR)/$(NAME).vcd
+# old mkfile
+.PHONY: rom
+rom: $(ROM_DIR)/$(NAME).rom
 
 .PHONY: nvboard
 nvboard: $(SRC)/$(NAME).v \
