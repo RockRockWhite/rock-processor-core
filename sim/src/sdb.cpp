@@ -13,6 +13,26 @@ static int cmd_q(std::vector<std::string> &tokens)
     return 0;
 }
 
+static void exec_once()
+{
+    // update instruction
+    // fake i memory
+    uint32_t pc = sdb::cpu->dut->pc_test;
+    uint32_t inst;
+    sdb::cpu->memory.read(pc, (uint8_t *)&inst, 4);
+    sdb::cpu->dut->instruction_test = inst;
+
+    // disasm
+    char inst_disasm[64];
+    // void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+    // disassemble(inst_disasm,
+    //             sizeof(inst_disasm), pc, (uint8_t *)&inst, 4);
+
+    // std::cout << std::format("0x{:08x}: 0x{:08x}  {}", pc, inst, inst_disasm) << std::endl;
+
+    sdb::cpu->tick_and_dump_wave();
+}
+
 static int cmd_si(std::vector<std::string> &tokens)
 {
     // if no argument, default exec one instruction
@@ -27,7 +47,7 @@ static int cmd_si(std::vector<std::string> &tokens)
 
     for (int i = 0; i != exec_cnt; i++)
     {
-        sdb::cpu->tick_and_dump_wave();
+        exec_once();
     }
 
     return 0;

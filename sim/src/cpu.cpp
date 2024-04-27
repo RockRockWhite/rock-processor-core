@@ -1,7 +1,5 @@
 #include <cpu.hpp>
-
 #include <stdexcept>
-
 #include <iostream>
 
 // ebreak DPI handler
@@ -20,7 +18,7 @@ cpu_t::cpu_t(std::string trace_file)
     this->trace = new VerilatedVcdC;
 
     this->dut = new VProcessorCore{this->ctx};
-    dut->clk = 0;
+    this->dut->clk = 0;
 
     this->dut->trace(this->trace, 5);
     this->trace->open(trace_file.c_str());
@@ -32,6 +30,8 @@ cpu_t::cpu_t(std::string trace_file)
     {
         this->state = CPU_STOP;
     };
+
+    this->dut->eval();
 }
 
 cpu_t::~cpu_t()
@@ -43,11 +43,6 @@ cpu_t::~cpu_t()
 
 void cpu_t::tick_and_dump_wave()
 {
-    // update memory
-    uint32_t inst;
-    this->memory.read(this->dut->pc_test, (uint8_t *)&inst, 4);
-    this->dut->instruction_test = inst;
-
     // tick
     dut->clk = (dut->clk == 0) ? 1 : 0;
     // eval

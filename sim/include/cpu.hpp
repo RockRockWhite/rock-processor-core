@@ -7,7 +7,7 @@
 
 #include "VProcessorCore.h"
 #include "VProcessorCore__Dpi.h"
-
+#include "VProcessorCore___024root.h"
 #include "fake_memory.h"
 
 void ebreak();
