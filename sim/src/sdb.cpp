@@ -148,7 +148,32 @@ static int cmd_x(std::vector<std::string> &tokens)
         return 0;
     }
 
-    std::cout << "Usage: x N EXPR\n"
+    std::cout << "Usage: x N EXPR"
+              << std::endl;
+
+    return -1;
+}
+
+static int cmd_p(std::vector<std::string> &tokens)
+{
+    if (tokens.size() == 2)
+    {
+        word_t expr_val;
+        try
+        {
+            expr_val = expr::expr(tokens[1]);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << std::format("parsing expr error: P{}", e.what()) << '\n';
+            return -1;
+        }
+
+        std::cout << std::format("0x{:08x} {}", expr_val, expr_val) << std::endl;
+        return 0;
+    }
+
+    std::cout << "Usage: p EXPR"
               << std::endl;
 
     return -1;
@@ -165,6 +190,8 @@ std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> 
     {"info", cmd_info},
     // Exam memory
     {"x", cmd_x},
+    // Print the value of an expression
+    {"p", cmd_p},
 };
 
 static std::vector<std::string> read_command()
