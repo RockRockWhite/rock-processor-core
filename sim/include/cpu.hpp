@@ -33,9 +33,15 @@ public:
     VProcessorCore *dut;
     memory_t memory;
     cpu_state_t state;
+    uint32_t *gpr[32];
+    uint32_t *pc;
 
     cpu_t(std::string trace_file);
     ~cpu_t();
 
+    void init_gpr();
+
     void tick_and_dump_wave();
+    uint32_t get_gpr(uint32_t index);
+    uint32_t get_pc();
 };

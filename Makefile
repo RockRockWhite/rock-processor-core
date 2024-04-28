@@ -35,7 +35,6 @@ $(BUILD_DIR)/V%.h: $(SRC)/%.v
 	@echo "verilator $<"
 	@verilator -cc --build --trace -I$(SRC) -Mdir $(BUILD_DIR) -CFLAGS "$(CFLAGS)" $<
 
-
 $(BUILD_DIR)/%.o: $(SIM_SRC)/%.cc
 	@mkdir -p $(BUILD_DIR)
 	@echo "CXX $<"
@@ -52,7 +51,7 @@ $(BUILD_DIR)/%.o: $(SIM_SRC)/%.cpp
 
 $(BINARY): $(BUILD_DIR)/VProcessorCore.h $(OBJS)
 	@echo LD $(OBJS)
-	$(LD) $(OBJS) -o $@ $(LDFLAGS) -lVProcessorCore -lLLVM-16
+	@$(LD) $(OBJS) -o $@ $(LDFLAGS) -lVProcessorCore -lLLVM-16
 
 $(BUILD_DIR)/%_tb.o: $(SIM_DIR)/module_test/%_tb.cpp $(BUILD_DIR)/V%.h
 	@echo "CXX $<"
@@ -91,10 +90,6 @@ module_test: $(BUILD_DIR)/$(NAME)_tb
 $(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
 	@echo "Generating ROM file..."
 	java -jar $(TOOLS_DIR)/venus.jar $< --dump > $@
-
-# $(BUILD_DIR)/disasm.o: $(SIM_DIR)/src/disasm.cc
-# 	@echo "Building disassembler..."
-# 	g++ -c $<  $(shell llvm-config --cxxflags) -fPIE $(shell llvm-config --libs)
 
 .PHONY: clean
 clean:

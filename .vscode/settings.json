@@ -75,7 +75,8 @@
         "variant": "cpp",
         "args.h": "c",
         "getopt.h": "c",
-        "args_builder.h": "c"
+        "args_builder.h": "c",
+        "riscv.hpp": "c"
     },
     "digital-ide.welcome.show": false,
     "digital-ide.dont-show-again.propose.issue": true
