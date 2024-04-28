@@ -16,7 +16,9 @@ CFLAGS = -O0
 CFLAGS += -g
 CFLAGS += $(addprefix -I, $(SIM_INC))
 CFLAGS += -std=c++20
+CFLAGS += -Wall
 CFLAGS += -Werror
+CFLAGS += -D__GUEST_ISA__=riscv32
 
 LDFLAGS = -L$(BUILD_DIR)
 LDFLAGS += -lverilated
@@ -27,28 +29,41 @@ OBJS = $(SRCS:$(SIM_SRC)/%.cpp=$(BUILD_DIR)/%.o)
 CXX = g++
 LD := $(CXX)
 BINARY = $(BUILD_DIR)/rpc
-DISPLAY = :0.0
+DISPLAY = :0.0  
 
 $(BUILD_DIR)/V%.h: $(SRC)/%.v
 	@echo "verilator $<"
 	@verilator -cc --build --trace -I$(SRC) -Mdir $(BUILD_DIR) -CFLAGS "$(CFLAGS)" $<
 
+
+$(BUILD_DIR)/%.o: $(SIM_SRC)/%.cc
+	@mkdir -p $(BUILD_DIR)
+	@echo "CXX $<"
+	@$(CXX) $(CFLAGS) -I/usr/include -std=c++17 -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fPIE -D__GUEST_ISA__=riscv32  -c $< -o $@
+	
 $(BUILD_DIR)/%.o: $(SIM_SRC)/%.cpp
 	@mkdir -p $(BUILD_DIR)
 	@echo "CXX $<"
-	@$(CXX) $(CFLAGS) -std=c++20 -Werror -c $< -o $@
+	@$(CXX) $(CFLAGS) -c $< -o $@
+
+# Depencies
+-include $(OBJS:.o=.d)
+
 
 $(BINARY): $(BUILD_DIR)/VProcessorCore.h $(OBJS)
 	@echo LD $(OBJS)
-	@$(LD) $(OBJS) -o $@ $(LDFLAGS) -lVProcessorCore
+	$(LD) $(OBJS) -o $@ $(LDFLAGS) -lVProcessorCore -lLLVM-16
 
 $(BUILD_DIR)/%_tb.o: $(SIM_DIR)/module_test/%_tb.cpp $(BUILD_DIR)/V%.h
 	@echo "CXX $<"
-	@$(CXX) $(CFLAGS) -std=c++20 -Werror -c $< -o $@
+	@$(CXX) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%_tb: $(BUILD_DIR)/%_tb.o
 	@echo LD $<
-	@$(LD) $< -o $@ $(LDFLAGS) -lV$*
+	@$(LD) $< -o $@ $(CFLAGS) $(LDFLAGS) -lV$*
+
+.PHONY: all
+all: $(BINARY)
 
 .PHONY: run
 run: $(BINARY)
@@ -77,9 +92,9 @@ $(ROM_DIR)/%.rom: $(ROM_DIR)/asm/%.asm
 	@echo "Generating ROM file..."
 	java -jar $(TOOLS_DIR)/venus.jar $< --dump > $@
 
-$(BUILD_DIR)/disasm.o: $(SIM_DIR)/src/disasm.cc
-	@echo "Building disassembler..."
-	g++ -c $<  $(shell llvm-config --cxxflags) -fPIE $(shell llvm-config --libs)
+# $(BUILD_DIR)/disasm.o: $(SIM_DIR)/src/disasm.cc
+# 	@echo "Building disassembler..."
+# 	g++ -c $<  $(shell llvm-config --cxxflags) -fPIE $(shell llvm-config --libs)
 
 .PHONY: clean
 clean:

@@ -4,9 +4,11 @@
 #include <functional>
 #include <unordered_map>
 #include "sdb.hpp"
+#include "utils/disasm.h"
 
 std::shared_ptr<cpu_t> sdb::cpu = nullptr;
 
+extern void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 static int cmd_q(std::vector<std::string> &tokens)
 {
     sdb::cpu->state = CPU_END;
@@ -24,11 +26,11 @@ static void exec_once()
 
     // disasm
     char inst_disasm[64];
-    // void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-    // disassemble(inst_disasm,
-    //             sizeof(inst_disasm), pc, (uint8_t *)&inst, 4);
 
-    // std::cout << std::format("0x{:08x}: 0x{:08x}  {}", pc, inst, inst_disasm) << std::endl;
+    utils::disassemble(inst_disasm,
+                       64, pc, (uint8_t *)&inst, 4);
+
+    std::cout << std::format("0x{:08x}: 0x{:08x}  {}", pc, inst, inst_disasm) << std::endl;
 
     sdb::cpu->tick_and_dump_wave();
 }
@@ -45,7 +47,7 @@ static int cmd_si(std::vector<std::string> &tokens)
         return 0;
     }
 
-    for (int i = 0; i != exec_cnt; i++)
+    for (uint64_t i = 0; i != exec_cnt; i++)
     {
         exec_once();
     }
@@ -80,6 +82,8 @@ static std::vector<std::string> read_command()
 
 void sdb::init(std::string trace_file, std::string img_file)
 {
+    // init disasm
+    utils::init_disasm("riscv32-pc-linux-gnu");
     sdb::cpu = std::make_shared<cpu_t>(trace_file);
     sdb::cpu->memory.load_img(img_file, 0x80000000);
 }
