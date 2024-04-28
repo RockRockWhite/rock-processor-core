@@ -23,9 +23,13 @@
 #include <string.h>
 #include <cassert>
 #include <unordered_map>
+#include <stdexcept>
+
+#define EXPR_DBG
 
 namespace expr
 {
+
   enum
   {
     TK_NOTYPE = 256,
@@ -63,7 +67,7 @@ namespace expr
       {"\\(", TK_LEFT_PAREN},                                                                                        // left parenthesis
       {"\\)", TK_RIGHT_PAREN},                                                                                       // right parenthesis
       {"0x([0-9]|a|A|b|B|c|C|d|D|e|E|f|F)+", TK_HEX},                                                                // hex
-      {"\\$(r([0-9]|(1[0-5]))|(0)|(ra)|(sp)|(gp)|(tp)|(t[0-6])|(fp)|(s([0-9]|(1[0-1])))|(a[0-7])|pc)", TK_REGISTER}, // register
+      {"\\$(x([0-9]|(1[0-5]))|(0)|(ra)|(sp)|(gp)|(tp)|(t[0-6])|(fp)|(s([0-9]|(1[0-1])))|(a[0-7])|pc)", TK_REGISTER}, // register
       {"[0-9]+", TK_DECIMAL},                                                                                        // decimal
 
   };
@@ -113,7 +117,7 @@ namespace expr
   static Token tokens[32] __attribute__((used)) = {};
   static int nr_token __attribute__((used)) = 0;
 
-  static bool make_token(const char *e, char *error_msg)
+  static void make_token(const char *e)
   {
     int position = 0;
     int i;
@@ -131,11 +135,12 @@ namespace expr
           const char *substr_start = e + position;
           int substr_len = pmatch.rm_eo;
 
-          // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-          //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
-
+// Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+//     i, rules[i].regex, position, substr_len, substr_len, substr_start);
+#ifdef EXPR_DBG
           printf("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
                  i, rules[i].regex, position, substr_len, substr_len, substr_start);
+#endif
           position += substr_len;
 
           /* TODO: Now a new token is recognized with rules[i]. Add codes
@@ -146,14 +151,12 @@ namespace expr
           // check the expr is not too long
           if (nr_token >= 32)
           {
-            sprintf(error_msg, "the expression is too long");
-            return false;
+            throw std::runtime_error("the expression is too long");
           }
           // check the too long token
           if (substr_len > 32)
           {
-            sprintf(error_msg, "some token is too long");
-            return false;
+            throw std::runtime_error("some token is too long");
           }
 
           switch (rules[i].token_type)
@@ -219,12 +222,9 @@ namespace expr
 
       if (i == NR_REGEX)
       {
-        sprintf(error_msg, "no match at position %d\n%s\n%*.s^\n", position, e, position, "");
-        return false;
+        throw std::runtime_error(std::format("no match at position %d\n%s\n%*.s^\n", position, e, position, ""));
       }
     }
-
-    return true;
   }
 
   static Token *find_dominant_op(Token *begin, Token *end)
@@ -284,15 +284,14 @@ namespace expr
 
   // eval express by token
   // [begin, end)
-  static bool eval(Token *begin, Token *end, word_t *value, char *error_msg)
+  static word_t eval(Token *begin, Token *end)
   {
     assert(begin <= end);
 
     // if the expression is empty
     if (begin == end)
     {
-      sprintf(error_msg, "unexpected expression");
-      return false;
+      throw std::runtime_error("unexpected expression");
     }
 
     // remove the outer parentheses
@@ -305,8 +304,7 @@ namespace expr
     // test if the parentheses are matched
     if (!is_parentheses_match(begin, end))
     {
-      sprintf(error_msg, "parentheses are not matched");
-      return false;
+      throw std::runtime_error("parentheses are not matched");
     }
 
     word_t res = 0;
@@ -352,20 +350,12 @@ namespace expr
       if (dominant_op == NULL)
       {
         // if there is no operator, failed
-        sprintf(error_msg, "unexpected expression");
-        return false;
+        throw std::runtime_error("unexpected expression");
       }
 
       // eval the left and right part
-      word_t left_val, right_val;
-
-      bool left_ok = eval(begin, dominant_op, &left_val, error_msg);
-      bool right_ok = eval(dominant_op + 1, end, &right_val, error_msg);
-
-      if ((!left_ok) || (!right_ok))
-      {
-        return false;
-      }
+      word_t left_val = eval(begin, dominant_op);
+      word_t right_val = eval(dominant_op + 1, end);
 
       // eval the result
       switch (dominant_op->type)
@@ -393,24 +383,22 @@ namespace expr
       }
     }
 
-    *value = res;
-    return true;
+    return res;
   }
 
-  bool expr(const char *e, word_t *value, char *error_msg)
+  word_t expr(std::string expr)
   {
-    if (!make_token(e, error_msg))
-    {
-      return false;
-    }
+    make_token(expr.c_str());
 
     // print the tokens
     for (int i = 0; i < nr_token; i++)
     {
+#ifdef EXPR_DBG
       printf("tokens[%d]: type = %d, str = %s\n", i, tokens[i].type, tokens[i].str);
+#endif
     }
 
     // /* TODO: Insert codes to evaluate the expression. */
-    return eval(tokens, tokens + nr_token, value, error_msg);
+    return eval(tokens, tokens + nr_token);
   }
 }

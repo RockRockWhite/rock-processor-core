@@ -18,9 +18,10 @@
 #pragma once
 
 #include <riscv.hpp>
+#include <string>
 
 namespace expr
 {
   void init_regex();
-  bool expr(const char *e, word_t *value, char *error_msg);
+  word_t expr(std::string expr);
 }

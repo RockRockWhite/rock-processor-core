@@ -123,13 +123,19 @@ static int cmd_x(std::vector<std::string> &tokens)
         int cnt = std::stoi(tokens[1]);
         std::string addr_expr = tokens[2];
 
-        char error_msg[128];
         word_t addr;
-        expr::expr(addr_expr.c_str(), &addr, error_msg);
-
-        std::cout << std::format("0x{:08x}:\t", addr);
+        try
+        {
+            addr = expr::expr(addr_expr);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << std::format("parsing expr error: P{}", e.what()) << '\n';
+            return -1;
+        }
 
         // exem the memory
+        std::cout << std::format("0x{:08x}:\t", addr);
         for (int i = 0; i < cnt; i++)
         {
             word_t curr_exam_addr = addr + i * 4;
@@ -234,6 +240,7 @@ word_t sdb::reg_str2val(std::string name, bool &ok)
     for (int i = 0; i < 32; i++)
     {
         int32_t idx = riscv::get_gpr_index(name);
+
         if (idx != -1)
         {
             ok = true;
