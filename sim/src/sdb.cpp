@@ -259,6 +259,33 @@ static int cmd_d(std::vector<std::string> &tokens)
     return -1;
 }
 
+static int cmd_b(std::vector<std::string> &tokens)
+{
+    if (tokens.size() == 2)
+    {
+        // find the first no used watchpoint id
+        auto expr = tokens[1];
+        watchpoint_t wp;
+        wp.id = (sdb::watchpoints.size() == 0) ? 0 : (sdb::watchpoints.back().id + 1);
+        wp.expression = std::format("$pc==({})", expr);
+        try
+        {
+            wp.last_value = expr::expr(wp.expression);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << std::format("parsing pc expr error: {}", e.what()) << '\n';
+            return -1;
+        }
+
+        sdb::watchpoints.push_back(wp);
+        return 0;
+    }
+
+    std::cout << std::format("Usage: b PC_EXPR") << std::endl;
+    return -1;
+}
+
 std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> cmd_table = {
     // Exec single instruction
     {"si", cmd_si},
@@ -276,6 +303,8 @@ std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> 
     {"w", cmd_w},
     // Delete watch point
     {"d", cmd_d},
+    // Breakpoint
+    {"b", cmd_b},
 };
 
 static std::vector<std::string> read_command()
