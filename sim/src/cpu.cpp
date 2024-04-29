@@ -28,7 +28,7 @@ cpu_t::cpu_t(std::string trace_file)
     // set ebreak handler
     cpu_t::ebreak_handler_func = [this]()
     {
-        this->state = CPU_STOP;
+        this->state = CPU_HLT;
     };
 
     this->dut->eval();

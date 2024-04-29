@@ -15,8 +15,8 @@ void ebreak();
 enum cpu_state_t
 {
     CPU_RUNNING,
-    CPU_STOP,
-    CPU_END,
+    CPU_BREAKPOINT,
+    CPU_HLT,
     CPU_ABORT,
     CPU_QUIT
 };

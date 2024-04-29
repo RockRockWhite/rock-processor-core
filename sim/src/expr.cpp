@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <stdexcept>
 
-#define EXPR_DBG
+// #define EXPR_DBG
 
 namespace expr
 {

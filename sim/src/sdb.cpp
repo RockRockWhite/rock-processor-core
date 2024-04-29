@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <list>
 #include <format>
 #include <functional>
 #include <unordered_map>
@@ -9,12 +10,36 @@
 #include "utils/disasm.h"
 
 std::shared_ptr<cpu_t> sdb::cpu = nullptr;
+std::list<watchpoint_t> sdb::watchpoints;
 
 extern void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 static int cmd_q(std::vector<std::string> &tokens)
 {
-    sdb::cpu->state = CPU_END;
+    sdb::cpu->state = CPU_QUIT;
     return 0;
+}
+
+static cpu_state_t trace_and_difftest()
+{
+    // watchpoint
+    for (auto &wp : sdb::watchpoints)
+    {
+        try
+        {
+            word_t new_value = expr::expr(wp.expression);
+            if (wp.last_value != new_value)
+            {
+                wp.last_value = new_value;
+                std::cout << std::format("hit watchpoint {}: {}", wp.id, wp.expression) << std::endl;
+                sdb::cpu->state = (sdb::cpu->state == CPU_RUNNING) ? CPU_BREAKPOINT : sdb::cpu->state;
+            }
+        }
+        catch (const std::exception &e)
+        {
+            assert(0);
+        }
+    }
+    return sdb::cpu->state;
 }
 
 static cpu_state_t exec_once()
@@ -36,13 +61,14 @@ static cpu_state_t exec_once()
 
     sdb::cpu->tick_and_dump_wave();
 
-    return sdb::cpu->state;
+    return trace_and_difftest();
 }
 
-static cpu_state_t exec_n(int64_t n)
+static cpu_state_t
+exec_n(int64_t n)
 {
     int64_t cnt = 0;
-
+    sdb::cpu->state = CPU_RUNNING;
     while (true)
     {
         if (n != -1 && cnt == n)
@@ -109,6 +135,11 @@ static int cmd_info(std::vector<std::string> &tokens)
 
     if (tokens.size() == 2 && tokens[1] == "w")
     {
+        // print all watchpoints
+        for (auto &wp : sdb::watchpoints)
+        {
+            std::cout << std::format("watchpoint {}: {}", wp.id, wp.expression) << std::endl;
+        }
         return 0;
     }
 
@@ -179,6 +210,55 @@ static int cmd_p(std::vector<std::string> &tokens)
     return -1;
 }
 
+static int cmd_w(std::vector<std::string> &tokens)
+{
+    if (tokens.size() == 2)
+    {
+        // find the first no used watchpoint id
+        auto expr = tokens[1];
+        watchpoint_t wp;
+        wp.id = (sdb::watchpoints.size() == 0) ? 0 : (sdb::watchpoints.back().id + 1);
+        wp.expression = expr;
+        try
+        {
+            wp.last_value = expr::expr(expr);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << std::format("parsing expr error: P{}", e.what()) << '\n';
+            return -1;
+        }
+
+        sdb::watchpoints.push_back(wp);
+        return 0;
+    }
+
+    std::cout << std::format("Usage: w EXPR") << std::endl;
+    return -1;
+}
+
+static int cmd_d(std::vector<std::string> &tokens)
+{
+    if (tokens.size() == 2)
+    {
+        int wp_id = std::stoi(tokens[1]);
+        auto wp = std::find_if(sdb::watchpoints.begin(), sdb::watchpoints.end(), [wp_id](const watchpoint_t &wp)
+                               { return wp.id == wp_id; });
+        if (wp == sdb::watchpoints.end())
+        {
+            std::cout << std::format("Watchpoint {} not found", wp_id) << std::endl;
+            return -1;
+        }
+
+        // delete the watchpoint
+        sdb::watchpoints.erase(wp);
+        return 0;
+    }
+
+    std::cout << std::format("Usage: d ID") << std::endl;
+    return -1;
+}
+
 std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> cmd_table = {
     // Exec single instruction
     {"si", cmd_si},
@@ -192,6 +272,10 @@ std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> 
     {"x", cmd_x},
     // Print the value of an expression
     {"p", cmd_p},
+    // Watch point
+    {"w", cmd_w},
+    // Delete watch point
+    {"d", cmd_d},
 };
 
 static std::vector<std::string> read_command()
@@ -242,10 +326,12 @@ void sdb::main_loop()
         {
         case CPU_RUNNING:
             continue;
-        case CPU_STOP:
+        case CPU_BREAKPOINT:
+            continue;
+        case CPU_HLT:
             std::cout << "HIT GOOD TRAP" << std::endl;
             return;
-        case CPU_END:
+        case CPU_QUIT:
             std::cout << "quit" << std::endl;
             return;
         default:
