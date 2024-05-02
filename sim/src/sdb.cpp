@@ -7,6 +7,7 @@
 #include "sdb.hpp"
 #include "riscv.hpp"
 #include "expr.hpp"
+#include "iringbuf.hpp"
 #include "utils/disasm.h"
 
 std::shared_ptr<cpu_t> sdb::cpu = nullptr;
@@ -51,13 +52,16 @@ static cpu_state_t exec_once()
     sdb::cpu->memory.read(pc, (uint8_t *)&inst, 4);
     sdb::cpu->dut->instruction_test = inst;
 
+    // iringbuf
+    iringbuf::append(pc, inst);
+
     // disasm
     char inst_disasm[64];
-
     utils::disassemble(inst_disasm,
                        64, pc, (uint8_t *)&inst, 4);
 
-    std::cout << std::format("0x{:08x}: 0x{:08x}  {}", pc, inst, inst_disasm) << std::endl;
+    unsigned char *inst_byte_ptr = (unsigned char *)&inst;
+    std::cout << std::format("0x{:08x}: {:02x} {:02x} {:02x} {:02x}    {}", pc, inst_byte_ptr[0], inst_byte_ptr[1], inst_byte_ptr[2], inst_byte_ptr[3], inst_disasm) << std::endl;
 
     sdb::cpu->tick_and_dump_wave();
 
@@ -117,7 +121,7 @@ static void reg_display()
     // print all the gpr
     for (int i = 0; i < 32; i++)
     {
-        std::cout << std::format("{:<3}\t0x{:08x}\t{}", riscv::gpr_abi_names[i], sdb::cpu->get_gpr(i), sdb::cpu->get_gpr(i)) << std::endl;
+        std::cout << std::format("{:<3}\t0x{:08x}\t{}", riscv::get_gpr_abi_name_by_index(i), sdb::cpu->get_gpr(i), sdb::cpu->get_gpr(i)) << std::endl;
     }
 
     // print pc
@@ -286,6 +290,25 @@ static int cmd_b(std::vector<std::string> &tokens)
     return -1;
 }
 
+static int cmd_disasm(std::vector<std::string> &tokens)
+{
+    if (tokens.size() == 1)
+    {
+        for (auto &inst : iringbuf::get_buf())
+        {
+            char inst_disasm[64];
+            utils::disassemble(inst_disasm,
+                               64, inst.pc, (uint8_t *)&inst.instruction, 4);
+            unsigned char *inst_byte_ptr = (unsigned char *)&inst.instruction;
+            std::cout << std::format("0x{:08x}: {:02x} {:02x} {:02x} {:02x}    {}", inst.pc, inst_byte_ptr[0], inst_byte_ptr[1], inst_byte_ptr[2], inst_byte_ptr[3], inst_disasm) << std::endl;
+        }
+        return 0;
+    }
+
+    std::cout << std::format("Usage: disasm") << std::endl;
+    return -1;
+}
+
 std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> cmd_table = {
     // Exec single instruction
     {"si", cmd_si},
@@ -305,6 +328,8 @@ std::unordered_map<std::string, std::function<int(std::vector<std::string> &)>> 
     {"d", cmd_d},
     // Breakpoint
     {"b", cmd_b},
+    // Disassemble the program
+    {"disasm", cmd_disasm},
 };
 
 static std::vector<std::string> read_command()
