@@ -165,7 +165,7 @@ static int cmd_x(std::vector<std::string> &tokens)
         }
         catch (const std::exception &e)
         {
-            std::cerr << std::format("parsing expr error: P{}", e.what()) << '\n';
+            std::cerr << std::format("parsing expr error: {}", e.what()) << '\n';
             return -1;
         }
 
