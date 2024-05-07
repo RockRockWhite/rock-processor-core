@@ -6,12 +6,12 @@
 #include <getopt.h>
 #include <cassert>
 
-class args_t
+struct args_t
 {
+    std::string img_file = "";
+    bool batch = false;
+    static args_t build(int argc, char **argv);
+
 private:
     args_t() {}
-
-public:
-    std::string img_file = "";
-    static args_t build(int argc, char **argv);
 };

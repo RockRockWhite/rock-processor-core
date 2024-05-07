@@ -113,8 +113,3 @@ nvboard: $(SRC)/$(NAME).v \
 	@echo "Done! Running nvboard..."
 	mkdir -p $(WAVEFORM_DIR)
 	cd $(WAVEFORM_DIR) && export DISPLAY=$(DISPLAY) && ../$(BUILD_DIR)/V$(NAME)
-
-
-
-
-

@@ -401,8 +401,26 @@ void sdb::init(std::string trace_file, std::string img_file)
     }
 }
 
-int sdb::main_loop()
+int sdb::main_loop(bool batch_mode)
 {
+    if (batch_mode)
+    {
+        switch (exec_n(-1))
+        {
+        case CPU_HLT:
+            std::cout << "HIT GOOD TRAP" << std::endl;
+            return 0;
+        case CPU_QUIT:
+            std::cout << "QUIT" << std::endl;
+            return -1;
+        case CPU_ABORT:
+            std::cout << "ABORT" << std::endl;
+            return -1;
+        default:
+            assert(0);
+        }
+    }
+
     while (true)
     {
         // read one command
