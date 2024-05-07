@@ -22,6 +22,8 @@ static int cmd_q(std::vector<std::string> &tokens)
 
 static cpu_state_t trace_and_difftest()
 {
+    // difftest
+
     // watchpoint
     for (auto &wp : sdb::watchpoints)
     {

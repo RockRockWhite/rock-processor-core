@@ -4,6 +4,7 @@
 #include <string>
 
 #define word_t uint32_t
+#define byte_t uint8_t
 
 namespace riscv
 {
