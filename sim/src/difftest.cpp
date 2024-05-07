@@ -1,5 +1,7 @@
 #include "difftest.hpp"
 #include "spike.hpp"
+#include <stdexcept>
+#include <format>
 
 namespace difftest
 {
@@ -97,5 +99,32 @@ namespace difftest
         }
 
         ref_difftest_exec(n);
+    }
+
+    uint64_t load_img(std::string img_file, uint64_t address)
+    {
+        if (!inited)
+        {
+            init();
+        }
+
+        FILE *fd = fopen(img_file.c_str(), "rb");
+
+        if (fd == nullptr)
+        {
+            throw std::runtime_error(std::format("Failed to open file: {}", img_file));
+        }
+
+        uint8_t byte;
+        uint64_t offset = 0;
+        while (fread(&byte, 1, 1, fd) == 1)
+        {
+
+            ref_difftest_memcpy(address + offset, (byte_t *)&byte, 1, direction_t::TO_REF);
+            offset++;
+        }
+
+        fclose(fd);
+        return offset;
     }
 }

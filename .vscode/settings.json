@@ -76,7 +76,9 @@
         "args.h": "c",
         "getopt.h": "c",
         "args_builder.h": "c",
-        "riscv.hpp": "c"
+        "riscv.hpp": "c",
+        "forward_list": "cpp",
+        "regex": "cpp"
     },
     "digital-ide.welcome.show": false,
     "digital-ide.dont-show-again.propose.issue": true

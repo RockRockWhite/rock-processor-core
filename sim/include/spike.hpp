@@ -16,7 +16,7 @@ struct cpu_state_t
     word_t pc;
 };
 
-const char so_path[] = "libspike.so";
+const char so_path[] = "./tools/spike/build/libspike.so";
 const int port = 5678;
 
 void (*ref_difftest_memcpy)(word_t addr, void *buf, size_t n, bool direction) = NULL;

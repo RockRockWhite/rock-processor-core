@@ -8,6 +8,7 @@
 #include "riscv.hpp"
 #include "expr.hpp"
 #include "iringbuf.hpp"
+#include "difftest.hpp"
 #include "utils/disasm.h"
 
 std::shared_ptr<cpu_t> sdb::cpu = nullptr;
@@ -22,7 +23,36 @@ static int cmd_q(std::vector<std::string> &tokens)
 
 static cpu_state_t trace_and_difftest()
 {
+    // if the cpu is not running, return
+    if (sdb::cpu->state != CPU_RUNNING)
+    {
+        return sdb::cpu->state;
+    }
+
     // difftest
+    difftest::exec(1);
+    bool diff = true;
+    if (difftest::get_pc() != sdb::cpu->get_pc())
+    {
+        diff = false;
+        std::cout << std::format("failed to pass the difftest, got pc: 0x{:08x}, expected pc: 0x{:08x}", sdb::cpu->get_pc(), difftest::get_pc()) << std::endl;
+    }
+
+    for (int i = 0; i != 32; i++)
+    {
+        if (difftest::get_gpr(i) != sdb::cpu->get_gpr(i))
+        {
+            diff = false;
+            std::cout << std::format("failed to pass the difftest, got {} = 0x{:08x}, expected {} = 0x{:08x}", riscv::get_gpr_abi_name_by_index(i), sdb::cpu->get_gpr(i), riscv::get_gpr_abi_name_by_index(i), difftest::get_gpr(i)) << std::endl;
+        }
+    }
+
+    if (!diff)
+    {
+        // failed to pass the difftest
+        sdb::cpu->state = CPU_ABORT;
+        return sdb::cpu->state;
+    }
 
     // watchpoint
     for (auto &wp : sdb::watchpoints)
@@ -356,9 +386,19 @@ void sdb::init(std::string trace_file, std::string img_file)
 {
     // init disasm
     utils::init_disasm("riscv32-pc-linux-gnu");
+
+    // init cpu
     sdb::cpu = std::make_shared<cpu_t>(trace_file);
     sdb::cpu->memory.load_img(img_file, 0x80000000);
     expr::init_regex();
+
+    // init difftest
+    difftest::load_img(img_file, 0x80000000);
+    difftest::set_pc(sdb::cpu->get_pc());
+    for (int i = 0; i < 32; i++)
+    {
+        difftest::set_gpr(i, sdb::cpu->get_gpr(i));
+    }
 }
 
 void sdb::main_loop()
@@ -388,7 +428,10 @@ void sdb::main_loop()
             std::cout << "HIT GOOD TRAP" << std::endl;
             return;
         case CPU_QUIT:
-            std::cout << "quit" << std::endl;
+            std::cout << "QUIT" << std::endl;
+            return;
+        case CPU_ABORT:
+            std::cout << "ABORT" << std::endl;
             return;
         default:
             assert(0);
