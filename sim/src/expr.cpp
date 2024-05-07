@@ -221,7 +221,7 @@ namespace expr
       }
       if (i == NR_REGEX)
       {
-        throw std::runtime_error(std::format("no match at position {}\n{}\n{:{}s}^\n", position, e, position, ""));
+        throw std::runtime_error(std::format("no match at position {}\n{}\n{:s}^\n", position, e, ""));
       }
     }
   }
