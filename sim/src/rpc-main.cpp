@@ -12,13 +12,11 @@ int main(int argc, char **argv)
         auto args = args_t::build(argc, argv);
 
         sdb::init("./waveform/rpc.vcd", args.img_file);
-        sdb::main_loop();
+        return sdb::main_loop();
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
         return -1;
     }
-
-    return 0;
 }

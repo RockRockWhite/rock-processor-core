@@ -401,7 +401,7 @@ void sdb::init(std::string trace_file, std::string img_file)
     }
 }
 
-void sdb::main_loop()
+int sdb::main_loop()
 {
     while (true)
     {
@@ -426,13 +426,13 @@ void sdb::main_loop()
             continue;
         case CPU_HLT:
             std::cout << "HIT GOOD TRAP" << std::endl;
-            return;
+            return 0;
         case CPU_QUIT:
             std::cout << "QUIT" << std::endl;
-            return;
+            return -1;
         case CPU_ABORT:
             std::cout << "ABORT" << std::endl;
-            return;
+            return -1;
         default:
             assert(0);
         }
