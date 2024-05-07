@@ -13,6 +13,8 @@ module ALU #(parameter N = 32)(
                 alu_result = a << b;
             4'd2: // slt
                 alu_result = ($signed(a) < $signed(b)) ? 1 : 0;
+            4'd3: // sltu
+                alu_result = (a < b) ? 1 : 0;
             4'd4: // xor
                 alu_result = a ^ b;
             4'd5: // srl

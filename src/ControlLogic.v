@@ -29,32 +29,55 @@ module ControlLogic(
         write_back_select = 2'b00;
 
         case(opcode)
-            7'b0100011: begin
-                // R type algorithm and logic instructions
-                if(funct3 == 3'b000) begin
-                    // add
+            7'b0110011: begin
+                pc_select = 1'b0;
 
+                a_select = 1'b0;
+                b_select = 1'b0;
+
+                register_write_enable = 1'b1;
+                write_back_select = 2'b01;
+
+                // R type algorithm and logic instructions
+                if(funct3 == 3'b000 && funct7 == 7'b0000000) begin
+                    // add
+                    alu_select = 4'd0;
+                end
+                if(funct3 == 3'b000 && funct7 == 7'b0100000) begin
+                    // add
+                    alu_select = 4'd12;
                 end
                 else if (funct3 == 3'b001) begin
-
+                    // sll
+                    alu_select = 4'd1;
                 end
                 else if (funct3 == 3'b010) begin
-
+                    // slt
+                    alu_select = 4'd2;
                 end
                 else if (funct3 == 3'b011) begin
-
+                    // sltu
+                    alu_select = 4'd3;
                 end
                 else if (funct3 == 3'b100) begin
-
+                    // xor
+                    alu_select = 4'd4;
                 end
-                else if (funct3 == 3'b101) begin
-
+                else if (funct3 == 3'b101 && funct7 == 7'b0000000) begin
+                    // srl
+                    alu_select = 4'd5;
+                end
+                else if (funct3 == 3'b101 && funct7 == 7'b0100000) begin
+                    // sra
+                    alu_select = 4'd13;
                 end
                 else if (funct3 == 3'b110) begin
-
+                    // or
+                    alu_select = 4'd6;
                 end
                 else if (funct3 == 3'b111) begin
-
+                    // and
+                    alu_select = 4'd7;
                 end
                 else begin
 
@@ -76,7 +99,39 @@ module ControlLogic(
 
                 if(funct3 == 3'b000) begin
                     // addi
-                    alu_select = 4'b0000;
+                    alu_select = 4'd0;
+                end
+                if (funct3 == 3'b010) begin
+                    // slti
+                    alu_select = 4'd2;
+                end
+                if (funct3 == 3'b011) begin
+                    // sltiu
+                    alu_select = 4'd3;
+                end
+                if (funct3 == 3'b100) begin
+                    // xori
+                    alu_select = 4'd4;
+                end
+                if (funct3 == 3'b110) begin
+                    // ori
+                    alu_select = 4'd6;
+                end
+                if (funct3 == 3'b111) begin
+                    // andi
+                    alu_select = 4'd7;
+                end
+                if (funct3 == 3'b001 && funct7 == 7'b0000000) begin
+                    // slli
+                    alu_select = 4'd1;
+                end
+                if (funct3 == 3'b101 && funct7 == 7'b0000000) begin
+                    // srli
+                    alu_select = 4'd5;
+                end
+                if (funct3 == 3'b101 && funct7 == 7'b0100000) begin
+                    // srai
+                    alu_select = 4'd13;
                 end
             end
 
