@@ -193,7 +193,66 @@ module ControlLogic(
 
                 write_back_select = 2'b10;
             end
+            7'b0000011: begin
+                // I type load
+                pc_select = 1'b0;
 
+                a_select = 1'b0;
+                b_select = 1'b1;
+
+                immediate_select = 3'b001;
+                register_write_enable = 1'b1;
+
+                alu_select = 4'b0;
+
+                write_back_select = 2'b00;
+
+                memory_write_enable = 1'b0;
+
+                if(funct3 == 3'b000) begin
+                    // lb
+                end
+                if(funct3 == 3'b001) begin
+                    // lh
+                end
+                if(funct3 == 3'b010) begin
+                    // lw
+                end
+                if(funct3 == 3'b100) begin
+                    // lbu
+                end
+                if(funct3 == 3'b101) begin
+                    // lhu
+                end
+            end
+            7'b0100011: begin
+                // S type store
+                pc_select = 1'b0;
+
+                a_select = 1'b0;
+                b_select = 1'b1;
+
+                immediate_select = 3'b010;
+                register_write_enable = 1'b0;
+
+                alu_select = 4'd0;
+                write_back_select = 2'b00;
+
+                memory_write_enable = 1'b1;
+
+                // if(funct3 == 3'b000) begin
+                //     // sb
+                //     alu_select = 4'd0;
+                // end
+                // if(funct3 == 3'b001) begin
+                //     // sh
+                //     alu_select = 4'd1;
+                // end
+                if(funct3 == 3'b010) begin
+                    // sw
+                    alu_select = 4'd2;
+                end
+            end
             default: begin
             end
 
