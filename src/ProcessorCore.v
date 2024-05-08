@@ -3,18 +3,20 @@
 `include "ALU.v"
 `include "ControlLogic.v"
 `include "ImmediateGenerator.v"
+`include "Memory.v"
 
 import "DPI-C" function void ebreak();
 
            module ProcesserCore(
-                   input clk,
-                   input [31:0] instruction_test,
-                   output [31:0] pc_test
+                   input clk
                );
 
                wire cl_pc_select;
                wire[31:0] pc_val;
                ProgramCounter pc(.clk(clk), .pc_select(cl_pc_select), .alu_result(alu_result), .instruction_address(pc_val));
+
+               wire [31:0] instruction;
+               Memory i_memory(.clk(0), .address(pc_val), .data_write(0), .write_enable(0), .data_read(instruction));
 
                wire [31:0] reg_read_data1;
                wire [31:0] reg_read_data2;
@@ -49,9 +51,9 @@ import "DPI-C" function void ebreak();
 
                Regfile regfile(
                            .clk(clk),
-                           .rs1(instruction_test[19:15]),
-                           .rs2(instruction_test[24:20]),
-                           .rd(instruction_test[11:7]),
+                           .rs1(instruction[19:15]),
+                           .rs2(instruction[24:20]),
+                           .rd(instruction[11:7]),
                            .write_data(write_back_data),
                            .write_enable(cl_register_write_enable),
                            .read_data1(reg_read_data1),
@@ -68,17 +70,16 @@ import "DPI-C" function void ebreak();
 
                ALU alu(.a(alu_a), .b(alu_b), .alu_select(cl_alu_select), .alu_result(alu_result));
 
-               ControlLogic cl(.instruction(instruction_test), .pc_select(cl_pc_select), .immediate_select(cl_immediate_select), .a_select(cl_a_select), .b_select(cl_b_select), .alu_select(cl_alu_select), .register_write_enable(cl_register_write_enable), .write_back_select(cl_write_back_select));
+               ControlLogic cl(.instruction(instruction), .pc_select(cl_pc_select), .immediate_select(cl_immediate_select), .a_select(cl_a_select), .b_select(cl_b_select), .alu_select(cl_alu_select), .register_write_enable(cl_register_write_enable), .write_back_select(cl_write_back_select));
                // outports wire
-               ImmediateGenerator imm_gen(.instruction(instruction_test), .immediate_select(cl_immediate_select), .immediate(immediate));
+               ImmediateGenerator imm_gen(.instruction(instruction), .immediate_select(cl_immediate_select), .immediate(immediate));
 
                // TODO: ebreak
                always @(*) begin
 
-                   if(instruction_test == 32'h00100073) begin
+                   if(instruction == 32'h00100073) begin
                        ebreak();
                    end
                end
 
-               assign pc_test = pc_val;
            endmodule

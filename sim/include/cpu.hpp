@@ -10,7 +10,11 @@
 #include "VProcessorCore___024root.h"
 #include "fake_memory.h"
 
+#include "riscv.hpp"
+
 void ebreak();
+int memory_read(int addr);
+void memory_write(int addr, int data);
 
 enum cpu_state_t
 {
@@ -33,8 +37,9 @@ public:
     VProcessorCore *dut;
     memory_t memory;
     cpu_state_t state;
-    uint32_t *gpr[32];
-    uint32_t *pc;
+    word_t *gpr[32];
+    word_t *pc;
+    word_t *instruction;
 
     cpu_t(std::string trace_file);
     ~cpu_t();
@@ -42,6 +47,7 @@ public:
     void init_gpr();
 
     void tick_and_dump_wave();
-    uint32_t get_gpr(uint32_t index);
-    uint32_t get_pc();
+    word_t get_gpr(word_t index);
+    word_t get_pc();
+    word_t get_instruction();
 };

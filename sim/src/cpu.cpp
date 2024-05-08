@@ -10,6 +10,21 @@ void ebreak()
     cpu_t::ebreak_handler_func();
 }
 
+std::function<word_t(word_t)> memory_read_handler_func = [](word_t addr) -> word_t
+{ throw std::runtime_error("memory_read_handler_func must be assigned a function"); };
+std::function<void(word_t, word_t)> memory_write_handler_func = [](word_t addr, word_t data)
+{ throw std::runtime_error("memory_write_handler_func must be assigned a function"); };
+
+int memory_read(int addr)
+{
+    return memory_read_handler_func(addr);
+}
+
+void memory_write(int addr, int data)
+{
+    memory_write_handler_func(addr, data);
+}
+
 cpu_t::cpu_t(std::string trace_file)
 {
     this->ctx = new VerilatedContext;
@@ -31,11 +46,23 @@ cpu_t::cpu_t(std::string trace_file)
         this->state = CPU_HLT;
     };
 
-    this->dut->eval();
+    // set memory handler
+    memory_read_handler_func = [this](word_t addr) -> word_t
+    {
+        word_t data;
+        this->memory.read(addr, (uint8_t *)&data, 4);
+        return data;
+    };
+
+    memory_write_handler_func = [this](word_t addr, word_t data)
+    {
+        this->memory.write(addr, (uint8_t *)&data, 4);
+    };
 
     // init gpr and pc
     this->init_gpr();
     this->pc = &this->dut->rootp->ProcesserCore__DOT__pc__DOT__pc_val;
+    this->instruction = &this->dut->rootp->ProcesserCore__DOT__instruction;
 }
 
 cpu_t::~cpu_t()
@@ -104,12 +131,17 @@ void cpu_t::tick_and_dump_wave()
     ctx->timeInc(1);
 }
 
-uint32_t cpu_t::get_gpr(uint32_t index)
+word_t cpu_t::get_gpr(word_t index)
 {
     return *(this->gpr[index]);
 }
 
-uint32_t cpu_t::get_pc()
+word_t cpu_t::get_pc()
 {
     return *(this->pc);
+}
+
+word_t cpu_t::get_instruction()
+{
+    return *(this->instruction);
 }

@@ -79,10 +79,8 @@ static cpu_state_t exec_once()
 {
     // update instruction
     // fake i memory
-    uint32_t pc = sdb::cpu->dut->pc_test;
-    uint32_t inst;
-    sdb::cpu->memory.read(pc, (uint8_t *)&inst, 4);
-    sdb::cpu->dut->instruction_test = inst;
+    uint32_t pc = sdb::cpu->get_pc();
+    uint32_t inst = sdb::cpu->get_instruction();
 
     // iringbuf
     iringbuf::append(pc, inst);
@@ -390,6 +388,8 @@ void sdb::init(std::string trace_file, std::string img_file)
     // init cpu
     sdb::cpu = std::make_shared<cpu_t>(trace_file);
     sdb::cpu->memory.load_img(img_file, 0x80000000);
+    sdb::cpu->dut->eval();
+
     expr::init_regex();
 
     // init difftest
