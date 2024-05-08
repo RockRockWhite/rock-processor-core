@@ -6,6 +6,7 @@ module ControlLogic(
         output reg b_select,
         output reg [3:0] alu_select,
         output reg register_write_enable,
+        output reg memory_write_enable,
         output reg [1:0] write_back_select
     );
 
@@ -27,6 +28,7 @@ module ControlLogic(
         alu_select = 4'b0000;
         register_write_enable = 1'b0;
         write_back_select = 2'b00;
+        memory_write_enable = 1'b0;
 
         case(opcode)
             7'b0110011: begin
