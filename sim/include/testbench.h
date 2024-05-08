@@ -79,7 +79,7 @@ public:
         }
 
         // run simulation
-        for (int time = 0; true; time++)
+        for (uint64_t time = 0; true; time++)
         {
             // if ebreak, or time out, break
             if ((this->total_time != 0 && time == this->total_time) ||
