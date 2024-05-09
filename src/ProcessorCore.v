@@ -4,10 +4,11 @@
 `include "ControlLogic.v"
 `include "ImmediateGenerator.v"
 `include "Memory.v"
+`include "DataSplitter.v"
 
 import "DPI-C" function void ebreak();
 
-module ProcesserCore (
+module ProcessorCore (
     input clk
 );
 
@@ -87,6 +88,15 @@ module ProcesserCore (
         .data_read(memory_data)
     );
 
+    wire [31:0] memory_data_splitted;
+    wire [ 2:0] cl_memory_split_option;
+
+    DataSplitter splitter (
+        .data_in (memory_data),
+        .option  (cl_memory_split_option),
+        .data_out(memory_data_splitted)
+    );
+
     ControlLogic cl (
         .instruction(instruction),
         .pc_select(cl_pc_select),
@@ -104,8 +114,6 @@ module ProcesserCore (
         .immediate_select(cl_immediate_select),
         .immediate(immediate)
     );
-
-
 
     // TODO: ebreak
     always @(*) begin

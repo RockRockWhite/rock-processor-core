@@ -9,7 +9,6 @@ module ProgramCounter #(
     output [N-1:0] instruction_address
 );
 
-
     wire [N-1:0] pc_val;
     reg  [N-1:0] pc_next;
     Register_R #(

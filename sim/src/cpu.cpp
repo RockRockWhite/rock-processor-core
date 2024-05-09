@@ -61,8 +61,8 @@ cpu_t::cpu_t(std::string trace_file)
 
     // init gpr and pc
     this->init_gpr();
-    this->pc = &this->dut->rootp->ProcesserCore__DOT__pc__DOT__pc_val;
-    this->instruction = &this->dut->rootp->ProcesserCore__DOT__instruction;
+    this->pc = &this->dut->rootp->ProcessorCore__DOT__pc__DOT__pc_val;
+    this->instruction = &this->dut->rootp->ProcessorCore__DOT__instruction;
 }
 
 cpu_t::~cpu_t()
@@ -74,7 +74,7 @@ cpu_t::~cpu_t()
 
 void cpu_t::init_gpr()
 {
-#define INIT_GPR(idx) this->gpr[idx] = &this->dut->rootp->ProcesserCore__DOT__regfile__DOT____Vcellout__regfile_block__BRA__##idx##__KET____DOT__regfile__q
+#define INIT_GPR(idx) this->gpr[idx] = &this->dut->rootp->ProcessorCore__DOT__regfile__DOT____Vcellout__regfile_block__BRA__##idx##__KET____DOT__regfile__q
     // init gpr from 0 to 31
     INIT_GPR(0);
     INIT_GPR(1);
