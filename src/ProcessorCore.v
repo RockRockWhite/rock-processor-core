@@ -40,7 +40,7 @@ module ProcessorCore (
 
     always @(*) begin
         case (cl_write_back_select)
-            2'b00: write_back_data = memory_data;
+            2'b00: write_back_data = memory_data_splitted;
             2'b01: write_back_data = alu_result;
             2'b10: write_back_data = pc_val + 4;
             2'b11: write_back_data = 32'h00000000;
@@ -106,6 +106,7 @@ module ProcessorCore (
         .alu_select(cl_alu_select),
         .register_write_enable(cl_register_write_enable),
         .write_back_select(cl_write_back_select),
+        .memory_split_option(cl_memory_split_option),
         .memory_write_enable(cl_memory_write_enable)
     );
     // outports wire

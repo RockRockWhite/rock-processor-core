@@ -7,6 +7,7 @@ module ControlLogic (
     output reg [3:0] alu_select,
     output reg register_write_enable,
     output reg memory_write_enable,
+    output reg [2:0] memory_split_option,
     output reg [1:0] write_back_select
 );
 
@@ -29,6 +30,7 @@ module ControlLogic (
         register_write_enable = 1'b0;
         write_back_select = 2'b00;
         memory_write_enable = 1'b0;
+        memory_split_option = 3'b000;
 
         case (opcode)
             7'b0110011: begin
