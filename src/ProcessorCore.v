@@ -91,7 +91,7 @@ module ProcessorCore (
     wire [31:0] memory_data_splitted;
     wire [ 2:0] cl_memory_split_option;
 
-    DataSplitter splitter (
+    DataSplitter memory_data_splitter (
         .data_in (memory_data),
         .option  (cl_memory_split_option),
         .data_out(memory_data_splitted)
@@ -117,7 +117,7 @@ module ProcessorCore (
     );
 
     // TODO: ebreak
-    always @(*) begin
+    always @(posedge clk) begin
 
         if (instruction == 32'h00100073) begin
             ebreak();

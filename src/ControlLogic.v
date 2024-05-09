@@ -19,8 +19,6 @@ module ControlLogic (
     assign funct3 = instruction[14:12];
     assign funct7 = instruction[31:25];
 
-
-
     always @(*) begin
         pc_select = 1'b0;
         immediate_select = 3'b000;
@@ -29,8 +27,8 @@ module ControlLogic (
         alu_select = 4'b0000;
         register_write_enable = 1'b0;
         write_back_select = 2'b00;
-        memory_write_enable = 1'b0;
         memory_split_option = 3'b000;
+        memory_write_enable = 1'b0;
 
         case (opcode)
             7'b0110011: begin
@@ -204,18 +202,23 @@ module ControlLogic (
 
                 if (funct3 == 3'b000) begin
                     // lb
+                    memory_split_option = 3'b011;
                 end
                 if (funct3 == 3'b001) begin
                     // lh
+                    memory_split_option = 3'b001;
                 end
                 if (funct3 == 3'b010) begin
                     // lw
+                    memory_split_option = 3'b000;
                 end
                 if (funct3 == 3'b100) begin
                     // lbu
+                    memory_split_option = 3'b100;
                 end
                 if (funct3 == 3'b101) begin
                     // lhu
+                    memory_split_option = 3'b010;
                 end
             end
             7'b0100011: begin
@@ -243,7 +246,6 @@ module ControlLogic (
                 // end
                 if (funct3 == 3'b010) begin
                     // sw
-                    alu_select = 4'd2;
                 end
             end
             default: begin
