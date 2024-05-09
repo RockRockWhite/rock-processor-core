@@ -2,6 +2,7 @@
 #include "spike.hpp"
 #include <stdexcept>
 #include <format>
+#include <iostream>
 
 namespace difftest
 {

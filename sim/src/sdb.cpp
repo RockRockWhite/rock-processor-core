@@ -14,6 +14,7 @@
 std::shared_ptr<cpu_t> sdb::cpu = nullptr;
 std::list<watchpoint_t> sdb::watchpoints;
 
+static void reg_display();
 extern void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 static int cmd_q(std::vector<std::string> &tokens)
 {
@@ -49,6 +50,9 @@ static cpu_state_t trace_and_difftest()
 
     if (!diff)
     {
+        // print the register
+        reg_display();
+
         // failed to pass the difftest
         sdb::cpu->state = CPU_ABORT;
         return sdb::cpu->state;

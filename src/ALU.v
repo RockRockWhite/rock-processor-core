@@ -27,8 +27,14 @@ module ALU #(
             alu_result = a & b;
             4'd12:  // sub
             alu_result = a - b;
-            4'd13:  // sra
-            alu_result = $signed(a) >>> b;
+            4'd13: begin
+                // sra
+                alu_result = a;
+
+                for (integer i = 0; i != {27'b0, b[4:0]}; i = i + 1) begin
+                    alu_result = {alu_result[31], alu_result[31:1]};
+                end
+            end
             4'd15:  // bsel
             alu_result = b;
             default: alu_result = 0;

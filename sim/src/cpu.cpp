@@ -51,14 +51,14 @@ cpu_t::cpu_t(std::string trace_file)
     {
         word_t data;
         this->memory.read(addr, (uint8_t *)&data, 4);
-        std::cout << std::format("memory read: addr=0x{:08x}, data=0x{:08x}\n", addr, data);
+        // std::cout << std::format("memory read: addr=0x{:08x}, data=0x{:08x}\n", addr, data);
         return data;
     };
 
     memory_write_handler_func = [this](word_t addr, word_t data, word_t size)
     {
         this->memory.write(addr, (uint8_t *)&data, size);
-        std::cout << std::format("memory write: addr=0x{:08x}, data=0x{:08x} size={}\n", addr, data, size);
+        // std::cout << std::format("memory write: addr=0x{:08x}, data=0x{:08x} size={}\n", addr, data, size);
     };
 
     // init gpr and pc
