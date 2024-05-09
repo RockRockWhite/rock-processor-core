@@ -1,14 +1,14 @@
-module ControlLogic(
-        input [31:0] instruction,
-        output reg pc_select,
-        output reg [2:0] immediate_select,
-        output reg a_select,
-        output reg b_select,
-        output reg [3:0] alu_select,
-        output reg register_write_enable,
-        output reg memory_write_enable,
-        output reg [1:0] write_back_select
-    );
+module ControlLogic (
+    input [31:0] instruction,
+    output reg pc_select,
+    output reg [2:0] immediate_select,
+    output reg a_select,
+    output reg b_select,
+    output reg [3:0] alu_select,
+    output reg register_write_enable,
+    output reg memory_write_enable,
+    output reg [1:0] write_back_select
+);
 
     wire [6:0] opcode;
     wire [2:0] funct3;
@@ -30,7 +30,7 @@ module ControlLogic(
         write_back_select = 2'b00;
         memory_write_enable = 1'b0;
 
-        case(opcode)
+        case (opcode)
             7'b0110011: begin
                 pc_select = 1'b0;
 
@@ -41,47 +41,38 @@ module ControlLogic(
                 write_back_select = 2'b01;
 
                 // R type algorithm and logic instructions
-                if(funct3 == 3'b000 && funct7 == 7'b0000000) begin
+                if (funct3 == 3'b000 && funct7 == 7'b0000000) begin
                     // add
                     alu_select = 4'd0;
                 end
-                if(funct3 == 3'b000 && funct7 == 7'b0100000) begin
+                if (funct3 == 3'b000 && funct7 == 7'b0100000) begin
                     // add
                     alu_select = 4'd12;
-                end
-                else if (funct3 == 3'b001) begin
+                end else if (funct3 == 3'b001) begin
                     // sll
                     alu_select = 4'd1;
-                end
-                else if (funct3 == 3'b010) begin
+                end else if (funct3 == 3'b010) begin
                     // slt
                     alu_select = 4'd2;
-                end
-                else if (funct3 == 3'b011) begin
+                end else if (funct3 == 3'b011) begin
                     // sltu
                     alu_select = 4'd3;
-                end
-                else if (funct3 == 3'b100) begin
+                end else if (funct3 == 3'b100) begin
                     // xor
                     alu_select = 4'd4;
-                end
-                else if (funct3 == 3'b101 && funct7 == 7'b0000000) begin
+                end else if (funct3 == 3'b101 && funct7 == 7'b0000000) begin
                     // srl
                     alu_select = 4'd5;
-                end
-                else if (funct3 == 3'b101 && funct7 == 7'b0100000) begin
+                end else if (funct3 == 3'b101 && funct7 == 7'b0100000) begin
                     // sra
                     alu_select = 4'd13;
-                end
-                else if (funct3 == 3'b110) begin
+                end else if (funct3 == 3'b110) begin
                     // or
                     alu_select = 4'd6;
-                end
-                else if (funct3 == 3'b111) begin
+                end else if (funct3 == 3'b111) begin
                     // and
                     alu_select = 4'd7;
-                end
-                else begin
+                end else begin
 
                 end
             end
@@ -99,7 +90,7 @@ module ControlLogic(
 
                 write_back_select = 2'b01;
 
-                if(funct3 == 3'b000) begin
+                if (funct3 == 3'b000) begin
                     // addi
                     alu_select = 4'd0;
                 end
@@ -209,19 +200,19 @@ module ControlLogic(
 
                 memory_write_enable = 1'b0;
 
-                if(funct3 == 3'b000) begin
+                if (funct3 == 3'b000) begin
                     // lb
                 end
-                if(funct3 == 3'b001) begin
+                if (funct3 == 3'b001) begin
                     // lh
                 end
-                if(funct3 == 3'b010) begin
+                if (funct3 == 3'b010) begin
                     // lw
                 end
-                if(funct3 == 3'b100) begin
+                if (funct3 == 3'b100) begin
                     // lbu
                 end
-                if(funct3 == 3'b101) begin
+                if (funct3 == 3'b101) begin
                     // lhu
                 end
             end
@@ -248,7 +239,7 @@ module ControlLogic(
                 //     // sh
                 //     alu_select = 4'd1;
                 // end
-                if(funct3 == 3'b010) begin
+                if (funct3 == 3'b010) begin
                     // sw
                     alu_select = 4'd2;
                 end
