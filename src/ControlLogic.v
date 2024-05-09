@@ -1,11 +1,14 @@
 module ControlLogic (
     input [31:0] instruction,
+    input branch_equal,
+    input branch_less_than,
     output reg pc_select,
     output reg [2:0] immediate_select,
     output reg a_select,
     output reg b_select,
     output reg [3:0] alu_select,
     output reg register_write_enable,
+    output reg branch_unsigned,
     output reg [3:0] memory_write_enable,
     output reg [2:0] memory_split_option,
     output reg [1:0] write_back_select
@@ -26,6 +29,7 @@ module ControlLogic (
         b_select = 1'b0;
         alu_select = 4'b0000;
         register_write_enable = 1'b0;
+        branch_unsigned = 1'b0;
         write_back_select = 2'b00;
         memory_split_option = 3'b000;
         memory_write_enable = 4'b0000;
@@ -245,6 +249,47 @@ module ControlLogic (
                     // sw
                     memory_write_enable = 4'b1111;
                 end
+            end
+            7'b1100011: begin
+                // B type branch
+                a_select = 1'b1;
+                b_select = 1'b1;
+
+                immediate_select = 3'b011;
+                register_write_enable = 1'b0;
+
+                alu_select = 4'd0;
+                write_back_select = 2'b00;
+
+                if (funct3 == 3'b000) begin
+                    // beq
+                    pc_select = branch_equal ? 1'b1 : 1'b0;
+                end
+                if (funct3 == 3'b001) begin
+                    // bne
+                    pc_select = branch_equal ? 1'b0 : 1'b1;
+                end
+                if (funct3 == 3'b100) begin
+                    // blt
+                    branch_unsigned = 1'b0;
+                    pc_select = branch_less_than ? 1'b1 : 1'b0;
+                end
+                if (funct3 == 3'b101) begin
+                    // bge
+                    branch_unsigned = 1'b0;
+                    pc_select = branch_less_than ? 1'b0 : 1'b1;
+                end
+                if (funct3 == 3'b110) begin
+                    // bltu
+                    branch_unsigned = 1'b1;
+                    pc_select = branch_less_than ? 1'b1 : 1'b0;
+                end
+                if (funct3 == 3'b111) begin
+                    // bgeu
+                    branch_unsigned = 1'b1;
+                    pc_select = branch_less_than ? 1'b0 : 1'b1;
+                end
+
             end
             default: begin
             end

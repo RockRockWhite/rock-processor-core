@@ -5,6 +5,7 @@
 `include "ImmediateGenerator.v"
 `include "Memory.v"
 `include "DataSplitter.v"
+`include "BranchComparator.v"
 
 import "DPI-C" function void ebreak();
 
@@ -97,14 +98,28 @@ module ProcessorCore (
         .data_out(memory_data_splitted)
     );
 
+    wire cl_branch_unsigned;
+    wire branch_equal;
+    wire branch_less_than;
+    BranchComparator branch_comparator (
+        .data1(reg_read_data1),
+        .data2(reg_read_data2),
+        .is_unsigned(cl_branch_unsigned),
+        .branch_equal(branch_equal),
+        .branch_less_than(branch_less_than)
+    );
+
     ControlLogic cl (
         .instruction(instruction),
+        .branch_equal(branch_equal),
+        .branch_less_than(branch_less_than),
         .pc_select(cl_pc_select),
         .immediate_select(cl_immediate_select),
         .a_select(cl_a_select),
         .b_select(cl_b_select),
         .alu_select(cl_alu_select),
         .register_write_enable(cl_register_write_enable),
+        .branch_unsigned(cl_branch_unsigned),
         .write_back_select(cl_write_back_select),
         .memory_split_option(cl_memory_split_option),
         .memory_write_enable(cl_memory_write_enable)
