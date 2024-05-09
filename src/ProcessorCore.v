@@ -79,7 +79,7 @@ module ProcessorCore (
     );
 
     wire [31:0] memory_data;
-    wire cl_memory_write_enable;
+    wire [ 3:0] cl_memory_write_enable;
     Memory d_memory (
         .clk(clk),
         .address(alu_result),

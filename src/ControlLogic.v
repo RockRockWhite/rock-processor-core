@@ -6,7 +6,7 @@ module ControlLogic (
     output reg b_select,
     output reg [3:0] alu_select,
     output reg register_write_enable,
-    output reg memory_write_enable,
+    output reg [3:0] memory_write_enable,
     output reg [2:0] memory_split_option,
     output reg [1:0] write_back_select
 );
@@ -28,7 +28,7 @@ module ControlLogic (
         register_write_enable = 1'b0;
         write_back_select = 2'b00;
         memory_split_option = 3'b000;
-        memory_write_enable = 1'b0;
+        memory_write_enable = 4'b0000;
 
         case (opcode)
             7'b0110011: begin
@@ -197,8 +197,7 @@ module ControlLogic (
                 alu_select = 4'b0;
 
                 write_back_select = 2'b00;
-
-                memory_write_enable = 1'b0;
+                memory_write_enable = 4'b0;
 
                 if (funct3 == 3'b000) begin
                     // lb
@@ -234,18 +233,17 @@ module ControlLogic (
                 alu_select = 4'd0;
                 write_back_select = 2'b00;
 
-                memory_write_enable = 1'b1;
-
-                // if(funct3 == 3'b000) begin
-                //     // sb
-                //     alu_select = 4'd0;
-                // end
-                // if(funct3 == 3'b001) begin
-                //     // sh
-                //     alu_select = 4'd1;
-                // end
+                if (funct3 == 3'b000) begin
+                    // sb
+                    memory_write_enable = 4'b0001;
+                end
+                if (funct3 == 3'b001) begin
+                    // sh
+                    memory_write_enable = 4'b0011;
+                end
                 if (funct3 == 3'b010) begin
                     // sw
+                    memory_write_enable = 4'b1111;
                 end
             end
             default: begin
