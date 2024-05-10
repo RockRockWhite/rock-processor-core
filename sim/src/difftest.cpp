@@ -8,6 +8,7 @@ namespace difftest
 {
 
     bool inited = false;
+    bool skip_ref = false;
 
     static void init()
     {
@@ -92,14 +93,22 @@ namespace difftest
         ref_difftest_memcpy(addr, buf, n, direction_t::TO_REF);
     }
 
-    void exec(uint64_t n)
+    bool exec(uint64_t n)
     {
         if (!inited)
         {
             init();
         }
 
+        // skip ref difftest
+        if (skip_ref)
+        {
+            skip_ref = false;
+            return true;
+        }
+
         ref_difftest_exec(n);
+        return false;
     }
 
     uint64_t load_img(std::string img_file, uint64_t address)
@@ -127,5 +136,10 @@ namespace difftest
 
         fclose(fd);
         return offset;
+    }
+
+    void skip_ref_difftest()
+    {
+        skip_ref = true;
     }
 }

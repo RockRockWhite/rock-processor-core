@@ -1,6 +1,7 @@
 #include <cpu.hpp>
 #include <stdexcept>
 #include <iostream>
+#include "difftest.hpp"
 
 // ebreak DPI handler
 std::function<void()> cpu_t::ebreak_handler_func = []()
@@ -57,6 +58,16 @@ cpu_t::cpu_t(std::string trace_file)
 
     memory_write_handler_func = [this](word_t addr, word_t data, word_t size)
     {
+        // handle mmio
+        // handle serial and skip difftest
+        if ((addr & ~0b11) == 0xa00003f8)
+        {
+            char *char_ptr = (char *)&data;
+            std::cerr << *char_ptr;
+            difftest::skip_ref_difftest();
+            return;
+        }
+
         this->memory.write(addr, (uint8_t *)&data, size);
         // std::cout << std::format("memory write: addr=0x{:08x}, data=0x{:08x} size={}\n", addr, data, size);
     };

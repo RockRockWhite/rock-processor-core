@@ -31,7 +31,20 @@ static cpu_state_t trace_and_difftest()
     }
 
     // difftest
-    difftest::exec(1);
+    bool skipped = difftest::exec(1);
+
+    // if the difftest is skipped,
+    // just copy the state from the dut
+    if (skipped)
+    {
+        // copy all the register
+        for (int i = 0; i != 32; i++)
+        {
+            difftest::set_gpr(i, sdb::cpu->get_gpr(i));
+        }
+        difftest::set_pc(sdb::cpu->get_pc());
+    }
+
     bool diff = true;
     if (difftest::get_pc() != sdb::cpu->get_pc())
     {
