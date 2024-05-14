@@ -17,4 +17,5 @@ namespace difftest
     uint64_t load_img(std::string img_file, uint64_t address);
 
     void skip_ref_difftest();
+    void skip_next_ref_difftest();
 }

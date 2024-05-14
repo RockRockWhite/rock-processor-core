@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include "difftest.hpp"
+#include "utils/timer.hpp"
 
 // ebreak DPI handler
 std::function<void()> cpu_t::ebreak_handler_func = []()
@@ -52,6 +53,23 @@ cpu_t::cpu_t(std::string trace_file)
     {
         word_t data;
         this->memory.read(addr, (uint8_t *)&data, 4);
+
+        // handle rtc
+        // in verilator, read memory happen just in the ent of the last cycle of the instruction
+        // so we need to skip the next ref difftest if read mmio
+        static uint64_t us = 0;
+        if ((addr & ~0b11) == 0xa0000048)
+        {
+            us = timer::get_time();
+            data = (uint32_t)us;
+            difftest::skip_next_ref_difftest();
+        }
+        if ((addr & ~0b11) == 0xa000004c)
+        {
+            data = (uint32_t)(us >> 32);
+            difftest::skip_next_ref_difftest();
+        }
+
         // std::cout << std::format("memory read: addr=0x{:08x}, data=0x{:08x}\n", addr, data);
         return data;
     };

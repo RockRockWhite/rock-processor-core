@@ -9,6 +9,7 @@ namespace difftest
 
     bool inited = false;
     bool skip_ref = false;
+    bool skip_next_ref = false;
 
     static void init()
     {
@@ -103,10 +104,13 @@ namespace difftest
         // skip ref difftest
         if (skip_ref)
         {
-            skip_ref = false;
+            skip_ref = skip_next_ref;
+            skip_next_ref = false;
             return true;
         }
 
+        skip_ref = skip_next_ref;
+        skip_next_ref = false;
         ref_difftest_exec(n);
         return false;
     }
@@ -141,5 +145,13 @@ namespace difftest
     void skip_ref_difftest()
     {
         skip_ref = true;
+    }
+
+    // in verilator
+    // read memory happen just in the ent of the last cycle of the instruction
+    // so we need to skip the next ref difftest if read mmio
+    void skip_next_ref_difftest()
+    {
+        skip_next_ref = true;
     }
 }
