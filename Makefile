@@ -22,6 +22,7 @@ CFLAGS += -D__GUEST_ISA__=riscv32
 
 LDFLAGS = -L$(BUILD_DIR)
 LDFLAGS += -lverilated
+LDFLAGS += $(shell llvm-config --libs)
 
 SRCS = $(wildcard $(SIM_SRC)/*.cpp)
 OBJS = $(SRCS:$(SIM_SRC)/%.cpp=$(BUILD_DIR)/%.o)
@@ -51,7 +52,7 @@ $(BUILD_DIR)/%.o: $(SIM_SRC)/%.cpp
 
 $(BINARY): $(BUILD_DIR)/VProcessorCore.h $(OBJS)
 	@echo LD $(OBJS)
-	@$(LD) $(OBJS) -o $@ $(LDFLAGS) -lVProcessorCore -lLLVM-16
+	@$(LD) $(OBJS) -o $@ $(LDFLAGS) -lVProcessorCore
 
 $(BUILD_DIR)/%_tb.o: $(SIM_DIR)/module_test/%_tb.cpp $(BUILD_DIR)/V%.h
 	@echo "CXX $<"
